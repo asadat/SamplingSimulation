@@ -136,33 +136,6 @@ void idle_event()
     // exit(0);
 }
 
-void DrawPlane()
-{
-
-    glLineWidth(2);
-    glColor3f(0,0,1);
-
-    glBegin(GL_LINES);
-    double L = 10, l=0.5;
-    for(int i = 0; i<= L/l; i++)
-    {
-        double x,y;
-        x = -L/2;
-        y = -L/2 + ((double)i)*l;
-
-        glVertex3f(x,y,0);
-        glVertex3f(x+L,y,0);
-
-        glVertex3f(y,x,0);
-        glVertex3f(y,x+L,0);
-
-
-    }
-
-
-
-    glEnd();
-}
 
 
 void render_event()
@@ -194,8 +167,6 @@ void render_event()
             Cam_Normal[0], Cam_Normal[1], Cam_Normal[2]);
 
 
-
-    DrawPlane();
 
    // World::Instance()->glDraw();
     Visualizer::glDrawAll();
