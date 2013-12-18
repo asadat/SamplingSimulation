@@ -1,3 +1,6 @@
+#ifndef VISUALIZER_H
+#define VISUALIZER_H
+
 #include <vector>
 
 class Visualizer
@@ -14,4 +17,4 @@ private:
     static std::vector<Visualizer*> objects;
 };
 
-
+#endif

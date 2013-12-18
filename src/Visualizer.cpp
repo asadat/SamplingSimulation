@@ -24,7 +24,6 @@ Visualizer::~Visualizer()
 
 void Visualizer::glDrawAll()
 {
-    printf("%d\n", objects.size());
     for(int i=0; i < objects.size(); i++)
         objects[i]->glDraw();
 }

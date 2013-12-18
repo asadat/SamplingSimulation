@@ -46,7 +46,8 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(0,1,0);
+            //glColor3f(0,1,0);
+            glColor3f(233.0/255, 227.0/255, 133.0/255);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -69,7 +70,7 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(0,1,0);
+            glColor3f(233.0/255, 227.0/255, 133.0/255);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -95,7 +96,7 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(0,1,0);
+            glColor3f(233.0/255, 227.0/255, 133.0/255);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -121,7 +122,7 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(0,1,0);
+            glColor3f(233.0/255, 227.0/255, 133.0/255);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -148,7 +149,7 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(0,1,0);
+            glColor3f(233.0/255, 227.0/255, 133.0/255);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else

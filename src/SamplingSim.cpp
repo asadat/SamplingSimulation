@@ -2,12 +2,12 @@
 #include "TooN/TooN.h"
 #include <map>
 #include "World.h"
+#include "FeatureTracker.h"
 
 using namespace TooN;
 
 unsigned int updateMS = 33;
 bool doUpdate = false;
-
 
 std::map<unsigned char, bool> Key;
 bool Mouse_Left, Mouse_Right, Mouse_Middle;
@@ -38,6 +38,8 @@ void rotateCamera(double yaw, double pitch, double roll)
 
 void update_event(int ms)
 {
+    static FeatureTracker featureTracker(makeVector(0,0,3));
+
     doUpdate = false; // any change and we go again. If we don't change anything, we stop updating
 
     // actions:
@@ -77,6 +79,42 @@ void update_event(int ms)
     if(Key['f']) // Descend
         translateCamera(0, 0, -moveRate);
 
+
+    if(Key['u'])
+    {
+        featureTracker.MoveSensor(makeVector(0,0.1,0));
+        doUpdate = true;
+    }
+
+    if(Key['j'])
+    {
+        featureTracker.MoveSensor(makeVector(0,-0.1,0));
+        doUpdate = true;
+    }
+
+    if(Key['h'])
+    {
+        featureTracker.MoveSensor(makeVector(-0.1,0,0));
+        doUpdate = true;
+    }
+
+    if(Key['k'])
+    {
+        featureTracker.MoveSensor(makeVector(0.1,0,0));
+        doUpdate = true;
+    }
+
+    if(Key['o'])
+    {
+        featureTracker.MoveSensor(makeVector(0,0,0.1));
+        doUpdate = true;
+    }
+
+    if(Key['l'])
+    {
+        featureTracker.MoveSensor(makeVector(0,0,-0.1));
+        doUpdate = true;
+    }
 
     if(Mouse_Right)
     {
@@ -259,6 +297,8 @@ int main(int argc, char **argv)
 {
 
     World::Instance();
+
+
        // Cam_Target= TooN::makeVector(0, -10, 10);
       //  Cam_Rotation= TooN::makeVector(0, -0.8, 0);
 
