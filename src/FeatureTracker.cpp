@@ -65,9 +65,19 @@ void FeatureTracker::glDraw()
 
     for(int i=0; i<fs.size(); i++)
     {
-        glPointSize(10*fs[i].size);
+        glPointSize(5*fs[i].size);
         glBegin(GL_POINTS);
         glVertex3f(fs[i].pos[0], fs[i].pos[1], fs[i].pos[2]+0.01);
+        glEnd();
+    }
+
+    // draw matched features
+    glColor3f(1,0,1);
+    for(int i=0; i<matchedFeatures.size(); i++)
+    {
+        glPointSize(10*matchedFeatures[i].size);
+        glBegin(GL_POINTS);
+        glVertex3f(matchedFeatures[i].pos[0], matchedFeatures[i].pos[1], matchedFeatures[i].pos[2]+0.01);
         glEnd();
     }
 }
@@ -81,11 +91,14 @@ void FeatureTracker::SetPose(Vector<3, double> newpose)
 {
     pose = newpose;
 
-    vector<Feature> fs = MatchedFeatures(pose);
+    vector<Feature> fs = TrackFeatures(pose);
     if(fs.size() < MIN_FEATURES)
     {
         GenerateFeatures(MIN_FEATURES - fs.size(), pose);
     }
+
+    UpdateMatchedFeatures();
+
 }
 
 void FeatureTracker::GenerateFeatures(int size, Vector<3, double> viewpoint)
@@ -111,6 +124,8 @@ void FeatureTracker::GenerateFeatures(int size, Vector<3, double> viewpoint)
 
         //printf("%f %f %f %f\n", f.pos[0], f.pos[1], f.pos[2], f.size);
 
+        mesh.AddVertex(f.pos);
+
         features.push_back(f);
     }
 
@@ -122,7 +137,12 @@ bool FeatureTracker::InsideFOV(Feature f, Vector<3, double> pos)
     return fabs(f.pos[0]-pos[0]) < fabs(pos[2]*tan(FOV/2)) && fabs(f.pos[1]-pos[1]) < fabs(pos[2]*tan(FOV/2));
 }
 
-std::vector<Feature> FeatureTracker::MatchedFeatures(Vector<3, double> viewpoint)
+void FeatureTracker::UpdateMatchedFeatures()
+{
+    matchedFeatures = TrackFeatures(pose);
+}
+
+std::vector<Feature> FeatureTracker::TrackFeatures(Vector<3, double> viewpoint)
 {
     vector<Feature> result;
 

@@ -116,6 +116,11 @@ void update_event(int ms)
         doUpdate = true;
     }
 
+    if(Key['p'])
+    {
+        World::Instance()->ToggleDraw();
+    }
+
     if(Mouse_Right)
     {
         // yaw and pitch camera

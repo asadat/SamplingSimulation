@@ -10,25 +10,25 @@ include_directories("/usr/include")
 #link_directories(${PCL_LIBRARY_DIRS})
 #link_directories("G:/Matlab/extern/lib/win32/microsoft")
 link_directories("/usr/lib/x86_64-linux-gnu")
+link_directories("/usr/lib")
 
-set(Samp_LIBRARIES GL GLU glut)
 
+set(Samp_LIBRARIES GL GLU glut gmp CGAL CGAL_Core)
+
+SET(GCC_CGAL_COMPILE_FLAGS "-frounding-math")
+
+SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_CGAL_COMPILE_FLAGS}" )
 
 add_executable (${ProjName} 
             src/SamplingSim.cpp
 	    src/World.cpp
 	    src/FeatureTracker.cpp
             src/Visualizer.cpp
+            src/MeshCreator.cpp
 
+            include/MeshCreator.h
 	    include/FeatureTracker.h
             include/World.h
-	    include/Visualizer.h)
+            include/Visualizer.h )
 
 target_link_libraries (${ProjName} ${Samp_LIBRARIES})
-
-# Add the required libraries for linking:
-#TARGET_LINK_LIBRARIES(${ProjName}
-#${MRPT_LIBS} # This is filled by FIND_PACKAGE(MRPT ...)
-#"" # Optional extra libs...
-#)
-# End of CMakeLists.Txt file. Save it as a plain text file and the name should be exactly CMakeLists.Txt

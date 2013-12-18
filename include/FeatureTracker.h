@@ -2,6 +2,8 @@
 #include <CNearTree.h>
 #include <Visualizer.h>
 
+#include "MeshCreator.h"
+
 #define     DEG2RAD     3.14/180
 #define     FOV         30*DEG2RAD
 
@@ -28,10 +30,16 @@ private:
 
     void GenerateFeatures(int size, Vector<3, double> viewpoint);
     void SetPose(Vector<3, double> newpose);
-    std::vector<Feature> MatchedFeatures(TooN::Vector<3, double> viewpoint);
+    std::vector<Feature> TrackFeatures(TooN::Vector<3, double> viewpoint);
+    void UpdateMatchedFeatures();
     bool InsideFOV(Feature f, Vector<3, double> pos);
 
 
     TooN::Vector<3, double> pose;
     std::vector<Feature> features;
+    std::vector<Feature> matchedFeatures;
+
+    MeshCreator mesh;
+
 };
+

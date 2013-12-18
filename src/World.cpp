@@ -172,6 +172,8 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
 
 void World::glDraw()
 {
+    if(!bDraw)
+        return;
 
     glLineWidth(2);
     glColor3f(0,0,1);
