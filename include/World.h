@@ -3,6 +3,9 @@
 #include "TooN/TooN.h"
 #include <vector>
 
+#define RAND(a,b)    (a)+((b)-(a))*((double)(rand()%1000))/1000
+
+
 using namespace TooN;
 using namespace std;
 

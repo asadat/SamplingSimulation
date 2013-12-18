@@ -3,14 +3,15 @@
 #include <Visualizer.h>
 
 #define     DEG2RAD     3.14/180
-#define     FOV         60*DEG2RAD
+#define     FOV         30*DEG2RAD
 
 using namespace std;
 using namespace TooN;
 
 struct Feature
 {
-    TooN::Vector<3, double> pos;
+    Vector<3, double> pos;
+    Vector<3, double> view;
     double size;
 };
 
@@ -25,6 +26,8 @@ public:
 
 private:
 
+    void GenerateFeatures(int size, Vector<3, double> viewpoint);
+    void SetPose(Vector<3, double> newpose);
     std::vector<Feature> MatchedFeatures(TooN::Vector<3, double> viewpoint);
     bool InsideFOV(Feature f, Vector<3, double> pos);
 

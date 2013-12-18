@@ -1,8 +1,7 @@
 #include "World.h"
 
-#define RAND(a,b)    a+(b-a)*((double)(rand()%1000))/1000
-#define WORLD_WIDTH     10
-#define WORLD_HEIGHT    10
+#define WORLD_WIDTH     20
+#define WORLD_HEIGHT    20
 
 World* World::instance = NULL;
 
@@ -16,7 +15,7 @@ World::World():Visualizer()
     // floor
 
 
-    int n=5;
+    int n=25;
     double maxL = 3;
     double maxH = 1.5;
 
