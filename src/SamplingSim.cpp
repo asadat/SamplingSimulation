@@ -159,7 +159,8 @@ void render_event()
 
     DrawPlane();
 
-    World::Instance()->glDraw();
+   // World::Instance()->glDraw();
+    Visualizer::glDrawAll();
 
 
     glutSwapBuffers();
@@ -257,6 +258,7 @@ void keyboard_up_event(unsigned char key, int x, int y)
 int main(int argc, char **argv)
 {
 
+    World::Instance();
        // Cam_Target= TooN::makeVector(0, -10, 10);
       //  Cam_Rotation= TooN::makeVector(0, -0.8, 0);
 

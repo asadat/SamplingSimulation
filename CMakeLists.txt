@@ -5,6 +5,7 @@ SET(ProjName SamplingSimulation)
 
 include_directories("./include")
 include_directories("./TooN/include")
+include_directories("/usr/include")
 
 #link_directories(${PCL_LIBRARY_DIRS})
 #link_directories("G:/Matlab/extern/lib/win32/microsoft")
@@ -17,6 +18,7 @@ add_executable (${ProjName}
             src/SamplingSim.cpp
 	    src/World.cpp
 	    src/FeatureTracker.cpp
+            src/Visualizer.cpp
 
 	    include/FeatureTracker.h
             include/World.h

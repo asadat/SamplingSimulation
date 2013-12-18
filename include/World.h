@@ -39,6 +39,7 @@ public:
         return instance;
     }
 
+
     void glDraw();
 
     double GetHeight(double x, double y);

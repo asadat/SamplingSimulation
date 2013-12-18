@@ -6,9 +6,9 @@
 
 World* World::instance = NULL;
 
-
-World::World()
+World::World():Visualizer()
 {
+    //RegisterGlDrawing();
 
     srand(time(NULL));
     double worldW = WORLD_WIDTH;
