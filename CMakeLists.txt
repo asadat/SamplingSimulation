@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.4.6 FATAL_ERROR)
 
-SET(ProjName SamplingSim)
+SET(ProjName SamplingSimulation)
 
 
 include_directories("./include")
@@ -16,6 +16,9 @@ set(Samp_LIBRARIES GL GLU glut)
 add_executable (${ProjName} 
             src/SamplingSim.cpp
 	    src/World.cpp
+	    src/FeatureTracker.cpp
+
+	    include/FeatureTracker.h
             include/World.h
 	    include/Visualizer.h)
 
