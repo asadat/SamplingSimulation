@@ -5,7 +5,7 @@
 #include "MeshCreator.h"
 
 #define     DEG2RAD     3.14/180
-#define     FOV         30*DEG2RAD
+#define     FOV         92*DEG2RAD
 
 using namespace std;
 using namespace TooN;
@@ -26,6 +26,9 @@ public:
 
     void MoveSensor(TooN::Vector<3,double> dPos);
 
+    void ToggleSensing(){ bSensing =! bSensing;}
+    void ClearHistory();
+
 private:
 
     void GenerateFeatures(int size, Vector<3, double> viewpoint);
@@ -39,6 +42,7 @@ private:
     std::vector<Feature> features;
     std::vector<Feature> matchedFeatures;
 
+    bool bSensing;
     MeshCreator mesh;
 
 };

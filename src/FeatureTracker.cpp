@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 //#define RAND(a,b)    a+((double)(b-a))*((double)(rand()%1000))/1000
-#define MIN_FEATURES    10
+#define MIN_FEATURES    50
 
 FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
 {
@@ -82,6 +82,12 @@ void FeatureTracker::glDraw()
     }
 }
 
+void FeatureTracker::ClearHistory()
+{
+    features.clear();
+    matchedFeatures.clear();
+}
+
 void FeatureTracker::MoveSensor(TooN::Vector<3, double> dPos)
 {
     SetPose(pose + dPos);
@@ -91,13 +97,17 @@ void FeatureTracker::SetPose(Vector<3, double> newpose)
 {
     pose = newpose;
 
-    vector<Feature> fs = TrackFeatures(pose);
-    if(fs.size() < MIN_FEATURES)
+    if(bSensing)
     {
-        GenerateFeatures(MIN_FEATURES - fs.size(), pose);
-    }
+        vector<Feature> fs = TrackFeatures(pose);
+        double rndMin = MIN_FEATURES * RAND(0.7,1.3);
+        if(fs.size() < rndMin)
+        {
+            GenerateFeatures(rndMin - fs.size(), pose);
+        }
 
-    UpdateMatchedFeatures();
+        UpdateMatchedFeatures();
+    }
 
 }
 

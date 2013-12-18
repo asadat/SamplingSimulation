@@ -9,6 +9,8 @@ World::World():Visualizer()
 {
     //RegisterGlDrawing();
 
+    bDraw = true;
+
     srand(time(NULL));
     double worldW = WORLD_WIDTH;
     double worldH = WORLD_HEIGHT;
@@ -46,7 +48,15 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
         if(i==0)
         {
             //glColor3f(0,1,0);
-            glColor3f(233.0/255, 227.0/255, 133.0/255);
+            if(bDrawGhost)
+            {
+                glColor4f(233.0/255, 227.0/255, 133.0/255,0.5);
+            }
+            else
+            {
+                glColor3f(233.0/255, 227.0/255, 133.0/255);
+            }
+
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -69,7 +79,15 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(233.0/255, 227.0/255, 133.0/255);
+            if(bDrawGhost)
+            {
+                glColor4f(233.0/255, 227.0/255, 133.0/255,0.5);
+            }
+            else
+            {
+                glColor3f(233.0/255, 227.0/255, 133.0/255);
+            }
+
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -95,7 +113,15 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(233.0/255, 227.0/255, 133.0/255);
+            if(bDrawGhost)
+            {
+                glColor4f(233.0/255, 227.0/255, 133.0/255,0.5);
+            }
+            else
+            {
+                glColor3f(233.0/255, 227.0/255, 133.0/255);
+            }
+
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -121,7 +147,15 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(233.0/255, 227.0/255, 133.0/255);
+            if(bDrawGhost)
+            {
+                glColor4f(233.0/255, 227.0/255, 133.0/255,0.5);
+            }
+            else
+            {
+                glColor3f(233.0/255, 227.0/255, 133.0/255);
+            }
+
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -148,7 +182,15 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
-            glColor3f(233.0/255, 227.0/255, 133.0/255);
+            if(bDrawGhost)
+            {
+                glColor4f(233.0/255, 227.0/255, 133.0/255,0.5);
+            }
+            else
+            {
+                glColor3f(233.0/255, 227.0/255, 133.0/255);
+            }
+
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         else
@@ -215,7 +257,7 @@ double World::GetHeight(double x, double y)
         }
     }
 
-    return height;
+    return height + RAND(-0.01,0.01);
 }
 
 void World::InsertPlane(double x1, double y1, double z1, double x2, double y2, double z2)
@@ -230,4 +272,23 @@ void World::InsertPlane(double x1, double y1, double z1, double x2, double y2, d
     plane.p2[2] = z2;
 
     planes.push_back(plane);
+}
+
+void World::ToggleDraw()
+{
+    if(bDrawGhost && bDraw)
+    {
+        bDrawGhost = false;
+        bDraw = true;
+    }
+    else if(!bDrawGhost && !bDraw)
+    {
+        bDrawGhost = true;
+        bDraw = true;
+    }
+    else
+    {
+        bDraw = false;
+        bDrawGhost = false;
+    }
 }

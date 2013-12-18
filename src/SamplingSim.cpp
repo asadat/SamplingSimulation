@@ -116,9 +116,14 @@ void update_event(int ms)
         doUpdate = true;
     }
 
-    if(Key['p'])
+    if(Key['1'])
     {
         World::Instance()->ToggleDraw();
+    }
+
+    if(Key['2'])
+    {
+        featureTracker.ToggleSensing();
     }
 
     if(Mouse_Right)
@@ -272,6 +277,10 @@ void keyboard_up_event(unsigned char key, int x, int y)
 int main(int argc, char **argv)
 {
 
+    printf("\n");
+    printf("\t1 ....... Toggle Environment Drawing\n");
+    printf("\t2 ....... Toggle Sensing\n\n");
+
     World::Instance();
 
 
@@ -282,7 +291,7 @@ int main(int argc, char **argv)
         glutInit(&argc, argv);
         // build our window
         glutInitWindowSize(800, 600);
-        glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+        glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH);
         glutCreateWindow("SamplingSim");
         glClearColor(1,1,1,0);
         glEnable(GL_POINT_SMOOTH);
@@ -299,6 +308,9 @@ int main(int argc, char **argv)
         glutMotionFunc(mouse_drag_event);
         glutPassiveMotionFunc(mouse_move_event);
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
         // define global state
         glDisable(GL_LIGHTING);
         glEnable(GL_DEPTH_TEST);
