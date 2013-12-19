@@ -23,12 +23,16 @@ public:
     FeatureTracker(TooN::Vector<3,double> startPos);
 
     void glDraw();
+    void DrawFrustum(Vector<3, double> camp, double size);
 
     void MoveSensor(TooN::Vector<3,double> dPos);
 
     void ToggleSensing(){ bSensing =! bSensing;}
     void ClearHistory();
 
+    void ExecuteCoveragePlan(double w_w, double w_l, double flying_height, double step_l);
+
+    void GoToNextWP(double step_l);
 private:
 
     void GenerateFeatures(int size, Vector<3, double> viewpoint);
@@ -44,6 +48,10 @@ private:
 
     bool bSensing;
     MeshCreator mesh;
+
+    //executed path
+    vector< Vector<3, double> > pathWPs;
+
 
 };
 

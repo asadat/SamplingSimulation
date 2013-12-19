@@ -25,35 +25,69 @@ FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
 
 }
 
-void FeatureTracker::glDraw()
+void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
 {
-
     glColor3f(1,1,1);
     glPointSize(10);
     glBegin(GL_POINTS);
-    glVertex3f(pose[0], pose[1], pose[2]);
+    glVertex3f(camp[0], camp[1], camp[2]);
     glEnd();
 
-    double dxy = pose[2] * tan(FOV/2);
+    double dxy = size * tan(FOV/2);
 
     glColor3f(0,0,0);
-    glLineWidth(4);
+    glLineWidth(1);
     glBegin(GL_LINES);
-    glVertex3f(pose[0], pose[1], pose[2]);
-    glVertex3f(pose[0], pose[1], pose[2]-0.5);
+    glVertex3f(camp[0], camp[1], camp[2]);
+    glVertex3f(camp[0], camp[1], camp[2]-0.5);
 
-    glVertex3f(pose[0], pose[1], pose[2]);
-    glVertex3f(pose[0]+dxy, pose[1]+dxy, 0);
+    glVertex3f(camp[0], camp[1], camp[2]);
+    glVertex3f(camp[0]+dxy, camp[1]+dxy, camp[2]-size);
 
-    glVertex3f(pose[0], pose[1], pose[2]);
-    glVertex3f(pose[0]+dxy, pose[1]-dxy, 0);
+    glVertex3f(camp[0], camp[1], camp[2]);
+    glVertex3f(camp[0]+dxy, camp[1]-dxy, camp[2]-size);
 
-    glVertex3f(pose[0], pose[1], pose[2]);
-    glVertex3f(pose[0]-dxy, pose[1]+dxy, 0);
+    glVertex3f(camp[0], camp[1], camp[2]);
+    glVertex3f(camp[0]-dxy, camp[1]+dxy, camp[2]-size);
 
-    glVertex3f(pose[0], pose[1], pose[2]);
-    glVertex3f(pose[0]-dxy, pose[1]-dxy, 0);
+    glVertex3f(camp[0], camp[1], camp[2]);
+    glVertex3f(camp[0]-dxy, camp[1]-dxy, camp[2]-size);
     glEnd();
+
+
+}
+
+void FeatureTracker::glDraw()
+{
+
+    DrawFrustum(pose, pose[2]);
+
+//    glColor3f(1,1,1);
+//    glPointSize(10);
+//    glBegin(GL_POINTS);
+//    glVertex3f(pose[0], pose[1], pose[2]);
+//    glEnd();
+
+//    double dxy = pose[2] * tan(FOV/2);
+
+//    glColor3f(0,0,0);
+//    glLineWidth(4);
+//    glBegin(GL_LINES);
+//    glVertex3f(pose[0], pose[1], pose[2]);
+//    glVertex3f(pose[0], pose[1], pose[2]-0.5);
+
+//    glVertex3f(pose[0], pose[1], pose[2]);
+//    glVertex3f(pose[0]+dxy, pose[1]+dxy, 0);
+
+//    glVertex3f(pose[0], pose[1], pose[2]);
+//    glVertex3f(pose[0]+dxy, pose[1]-dxy, 0);
+
+//    glVertex3f(pose[0], pose[1], pose[2]);
+//    glVertex3f(pose[0]-dxy, pose[1]+dxy, 0);
+
+//    glVertex3f(pose[0], pose[1], pose[2]);
+//    glVertex3f(pose[0]-dxy, pose[1]-dxy, 0);
+//    glEnd();
 
 
     //std::vector<Feature> fs = MatchedFeatures(pose);
@@ -79,6 +113,23 @@ void FeatureTracker::glDraw()
         glBegin(GL_POINTS);
         glVertex3f(matchedFeatures[i].pos[0], matchedFeatures[i].pos[1], matchedFeatures[i].pos[2]+0.01);
         glEnd();
+    }
+
+
+    // draw path
+    for(int i=0; i<pathWPs.size(); i++)
+    {
+        DrawFrustum(pathWPs[i], pathWPs[i][2]);
+
+        if(i<pathWPs.size()-1)
+        {
+            glColor3f(0,0,0);
+            glLineWidth(3);
+            glBegin(GL_LINES);
+            glVertex3f(pathWPs[i][0],pathWPs[i][1],pathWPs[i][2]);
+            glVertex3f(pathWPs[i+1][0],pathWPs[i+1][1],pathWPs[i+1][2]);
+            glEnd();
+        }
     }
 }
 
@@ -171,4 +222,49 @@ std::vector<Feature> FeatureTracker::TrackFeatures(Vector<3, double> viewpoint)
    // printf("Generating Features %d\n", result.size());
 
     return result;
+}
+
+void FeatureTracker::ExecuteCoveragePlan(double w_w, double w_l, double flying_height, double step_l)
+{
+    bSensing = false;
+
+    double footPrint_l = 2*flying_height*tan(FOV/2);
+    Vector<3, double> startPoint = makeVector(-w_w/2, -w_l/2, flying_height);
+    SetPose(startPoint+ makeVector(footPrint_l/2,footPrint_l/2,0));
+
+    bool alternateFlag = false;
+    for(int i=0; i< ceil(w_w/footPrint_l); i++)
+    {
+        double x = startPoint[0] + footPrint_l/2 + ((double)i)*footPrint_l;
+
+        alternateFlag = !alternateFlag;
+
+        for(int j=(alternateFlag)?0:(ceil(w_l/footPrint_l)-1); (alternateFlag)?(j<ceil(w_l/footPrint_l)):(j>=0);(alternateFlag)?(j++):(j--))
+        {
+            double y = startPoint[1] + footPrint_l/2 + ((double)j)*footPrint_l;
+
+            pathWPs.push_back(makeVector(x,y, flying_height));
+
+        }
+
+    }
+
+}
+
+void FeatureTracker::GoToNextWP(double step_l)
+{
+    bSensing = true;
+    for(int i=0; i< pathWPs.size()-1; i++)
+    {
+        double wpd = sqrt((pathWPs[i+1]-pathWPs[i])*(pathWPs[i+1]-pathWPs[i]));
+        for(int j =0; j< ceil(wpd/step_l); j++)
+        {
+            //SetPose(/*pose + (step_l/wpd)*(pathWPs[i+1]-pathWPs[i])*/pathWPs[i]);
+            MoveSensor((step_l/wpd)*(pathWPs[i+1]-pathWPs[i]));
+        }
+
+        pathWPs.erase(pathWPs.begin());
+        break;
+
+    }
 }

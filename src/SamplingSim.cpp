@@ -39,6 +39,14 @@ void rotateCamera(double yaw, double pitch, double roll)
 void update_event(int ms)
 {
     static FeatureTracker featureTracker(makeVector(0,0,3));
+    static bool firsttime =true;
+
+    if(firsttime)
+    {
+        featureTracker.ExecuteCoveragePlan(World::Instance()->GetWorldWidth(), World::Instance()->GetWorldLength(), 2, 0.5);
+        firsttime = false;
+    }
+
 
     doUpdate = false; // any change and we go again. If we don't change anything, we stop updating
 
@@ -126,6 +134,11 @@ void update_event(int ms)
         featureTracker.ToggleSensing();
     }
 
+    if(Key['='])
+    {
+        featureTracker.GoToNextWP(0.5);
+        doUpdate = true;
+    }
     if(Mouse_Right)
     {
         // yaw and pitch camera

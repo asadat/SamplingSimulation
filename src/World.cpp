@@ -1,7 +1,7 @@
 #include "World.h"
 
 #define WORLD_WIDTH     20
-#define WORLD_HEIGHT    20
+#define WORLD_LENGTH    20
 
 World* World::instance = NULL;
 
@@ -13,7 +13,7 @@ World::World():Visualizer()
 
     srand(time(NULL));
     double worldW = WORLD_WIDTH;
-    double worldH = WORLD_HEIGHT;
+    double worldL = WORLD_LENGTH;
     // floor
 
 
@@ -22,14 +22,14 @@ World::World():Visualizer()
     double maxH = 1.5;
 
 
-    InsertPlane(-worldW/2 - maxL/2, worldH/2+maxL/2, 0, worldW/2+maxL/2, -worldH/2-maxL/2, 0);
+    InsertPlane(-worldW/2 - maxL/2, worldL/2+maxL/2, 0, worldW/2+maxL/2, -worldL/2-maxL/2, 0);
 
     for(int i=0; i<n; i++)
     {
         double x,y,z;
         double lx,ly;
         x = RAND(-worldW/2, worldW/2);
-        y = RAND(-worldH/2, worldH/2);
+        y = RAND(-worldL/2, worldL/2);
         z = RAND(1, maxH);
         lx = RAND(1, maxL);
         ly = RAND(1, maxL);
@@ -291,4 +291,14 @@ void World::ToggleDraw()
         bDraw = false;
         bDrawGhost = false;
     }
+}
+
+double World::GetWorldLength()
+{
+    return WORLD_LENGTH;
+}
+
+double World::GetWorldWidth()
+{
+    return WORLD_WIDTH;
 }
