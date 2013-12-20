@@ -27,12 +27,15 @@ public:
 
     void MoveSensor(TooN::Vector<3,double> dPos);
 
+    void ToggleDrawEntropyField(){bDrawEntropy = !bDrawEntropy;}
     void ToggleSensing(){ bSensing =! bSensing;}
     void ClearHistory();
 
     void ExecuteCoveragePlan(double w_w, double w_l, double flying_height, double step_l);
 
     void GoToNextWP(double step_l);
+    Vector<3, double> GetSensorPose(){return pose;}
+
 private:
 
     void GenerateFeatures(int size, Vector<3, double> viewpoint);
@@ -40,6 +43,7 @@ private:
     std::vector<Feature> TrackFeatures(TooN::Vector<3, double> viewpoint);
     void UpdateMatchedFeatures();
     bool InsideFOV(Feature f, Vector<3, double> pos);
+    void OnPlanExecuted();
 
 
     TooN::Vector<3, double> pose;
@@ -48,9 +52,13 @@ private:
 
     bool bSensing;
     MeshCreator mesh;
+    double footprint_length;
+    bool bDrawEntropy;
 
     //executed path
     vector< Vector<3, double> > pathWPs;
+    vector< Vector<3, double> > nextPath;
+    vector<double> entropies;
 
 
 };

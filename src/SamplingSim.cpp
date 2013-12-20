@@ -43,7 +43,7 @@ void update_event(int ms)
 
     if(firsttime)
     {
-        featureTracker.ExecuteCoveragePlan(World::Instance()->GetWorldWidth(), World::Instance()->GetWorldLength(), 2, 0.5);
+        //featureTracker.ExecuteCoveragePlan(World::Instance()->GetWorldWidth(), World::Instance()->GetWorldLength(), 2, 0.5);
         firsttime = false;
     }
 
@@ -134,11 +134,30 @@ void update_event(int ms)
         featureTracker.ToggleSensing();
     }
 
+    if(Key['3'])
+    {
+        featureTracker.ToggleDrawEntropyField();
+    }
+
+    static bool generatePlan = true;
     if(Key['='])
     {
+        if(generatePlan)
+        {
+            generatePlan = false;
+            featureTracker.ExecuteCoveragePlan(World::Instance()->GetWorldWidth(), World::Instance()->GetWorldLength(), featureTracker.GetSensorPose()[2] , 0.5);
+        }
+
         featureTracker.GoToNextWP(0.5);
         doUpdate = true;
     }
+
+    if(Key['-'])
+    {
+        generatePlan = true;
+        featureTracker.ClearHistory();
+    }
+
     if(Mouse_Right)
     {
         // yaw and pitch camera

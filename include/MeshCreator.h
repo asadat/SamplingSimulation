@@ -19,6 +19,9 @@ public:
 
     void glDraw();
 
+    double GetEntropy(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
+
+    double maxEntropy;
 private:
 
     Delaunay mesh;

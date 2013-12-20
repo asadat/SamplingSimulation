@@ -12,29 +12,30 @@ World::World():Visualizer()
     bDraw = true;
 
     srand(time(NULL));
+
     double worldW = WORLD_WIDTH;
     double worldL = WORLD_LENGTH;
     // floor
 
 
-    int n=25;
+    int n=10;
     double maxL = 3;
     double maxH = 1.5;
 
 
-    InsertPlane(-worldW/2 - maxL/2, worldL/2+maxL/2, 0, worldW/2+maxL/2, -worldL/2-maxL/2, 0);
+    InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);
 
     for(int i=0; i<n; i++)
     {
         double x,y,z;
         double lx,ly;
-        x = RAND(-worldW/2, worldW/2);
-        y = RAND(-worldL/2, worldL/2);
+        lx = RAND(1, maxL/2);
+        ly = RAND(1, maxL/2);
+        x = RAND((-worldW/2+lx),(worldW/2-lx));
+        y = RAND((-worldL/2+ly),(worldL/2-ly));
         z = RAND(1, maxH);
-        lx = RAND(1, maxL);
-        ly = RAND(1, maxL);
 
-        InsertPlane(x-lx/2, y+ly/2, z, x+lx/2, y-ly/2, z);
+        InsertPlane(x-lx, y+ly, z, x+lx, y-ly, z);
     }
 
 }

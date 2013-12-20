@@ -1,6 +1,7 @@
 #include "MeshCreator.h"
 #include "GL/gl.h"
 
+using namespace TooN;
 MeshCreator::MeshCreator():Visualizer()
 {
 
@@ -17,11 +18,11 @@ void MeshCreator::AddVertex(TooN::Vector<3,double> v)
 void MeshCreator::CleanMesh()
 {
     mesh.clear();
+    maxEntropy = 0.001;
 }
 
 void MeshCreator::glDraw()
 {
-
     Delaunay::Finite_faces_iterator fit;
 
     //WireFrame
@@ -62,6 +63,39 @@ void MeshCreator::glDraw()
         glVertex3f(p[2].x(), p[2].y(), p[2].z());
     }
     glEnd();
+}
 
+double MeshCreator::GetEntropy(Vector<2, double> tl, Vector<2, double> br)
+{
+    double entropy = 0;
+    Delaunay::Finite_faces_iterator fit;
 
+    for(fit = mesh.finite_faces_begin();fit != mesh.finite_faces_end(); ++fit)
+    {
+        Point p[3];
+        p[0] = fit->vertex(0)->point();
+        p[1] = fit->vertex(1)->point();
+        p[2] = fit->vertex(2)->point();
+
+        int n = 0;
+        for(int i=0; i < 3; i++)
+        {
+            if(p[i].x() > tl[0] && p[i].x() < br[0] && p[i].y() < tl[1] && p[i].y() > br[1])
+            {
+                n++;
+            }
+
+            if(n>=2)
+                break;
+        }
+
+        if(n>=2)
+        {
+            entropy += fabs(p[0].z()-p[1].z()) + fabs(p[1].z()-p[2].z()) + fabs(p[2].z()-p[0].z());
+        }
+    }
+
+    maxEntropy = (maxEntropy>entropy)?maxEntropy:entropy;
+   // printf("MAX: %f\n",max);
+    return entropy;
 }
