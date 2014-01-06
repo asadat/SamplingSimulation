@@ -19,8 +19,8 @@ World::World():Visualizer()
     // floor
 
 
-    int n = WORLD_WIDTH*WORLD_LENGTH/40;
-    double maxL = 3;
+    int n = WORLD_WIDTH*WORLD_LENGTH/140;
+    double maxL = 7;
 
     InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);
 

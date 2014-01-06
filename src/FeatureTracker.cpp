@@ -28,7 +28,7 @@ FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
 
 void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
 {
-    glColor3f(1,1,1);
+    glColor3f(1,0,0);
     glPointSize(10);
     glBegin(GL_POINTS);
     glVertex3f(camp[0], camp[1], camp[2]);
@@ -92,7 +92,13 @@ void FeatureTracker::glDraw()
     // draw path
     for(int i=0; i<pathWPs.size(); i++)
     {
-        DrawFrustum(pathWPs[i], pathWPs[i][2]);
+       // DrawFrustum(pathWPs[i], pathWPs[i][2]);
+        glColor3f(1,1,1);
+        glPointSize(10);
+        glBegin(GL_POINTS);
+        glVertex3f(pathWPs[i][0], pathWPs[i][1], pathWPs[i][2]);
+        glEnd();
+
 
         if(i+1<pathWPs.size())
         {
@@ -140,6 +146,11 @@ void FeatureTracker::MoveSensor(TooN::Vector<3, double> dPos)
     SetPose(pose + dPos);
 }
 
+void FeatureTracker::MoveSensorTo(Vector<3,double> pos)
+{
+    SetPose(pos);
+}
+
 void FeatureTracker::SetPose(Vector<3, double> newpose)
 {
     pose = newpose;
@@ -147,6 +158,7 @@ void FeatureTracker::SetPose(Vector<3, double> newpose)
     if(bSensing)
     {
         vector<Feature> fs = TrackFeatures(pose);
+
         double rndMin = MIN_FEATURES * RAND(0.7,1.3);
         if(fs.size() < rndMin)
         {
@@ -159,7 +171,7 @@ void FeatureTracker::SetPose(Vector<3, double> newpose)
 }
 double FeatureTracker::GetSamplingLevels(int &level)
 {
-    return ((double)level) * 0.5;
+    //return ((double)level) * 0.5;
     //double wl = World::Instance()->GetLength();
     if(level<1)
         level = 1;
@@ -175,7 +187,7 @@ double FeatureTracker::GetSamplingLevels(int &level)
         dv*=2;
     }
     double result = (0.5*max_l/dv)*tan(FOV/2);
-    if(result < World::Instance()->GetMaxHeight())
+    if(result < 0.1/*World::Instance()->GetMaxHeight()*/)
     {
         if(level <=1)
         {
@@ -210,7 +222,7 @@ void FeatureTracker::GenerateFeatures(int size, Vector<3, double> viewpoint)
         f.pos[0] = RAND(x1, x2);
         f.pos[1] = RAND(y1, y2);
 
-        f.pos[2] = World::Instance()->GetHeight(f.pos[0], f.pos[1]);
+        f.pos[2] = World::Instance()->GetHeight(f.pos[0], f.pos[1])+RAND(0,0.1)*viewpoint[2];
         f.size = (viewpoint[2] - f.pos[2])*tan(FOV/2)*RAND(0.5, 0.8);
 
         //printf("%f %f %f %f\n", f.pos[0], f.pos[1], f.pos[2], f.size);
@@ -249,6 +261,17 @@ std::vector<Feature> FeatureTracker::TrackFeatures(Vector<3, double> viewpoint)
 
     return result;
 }
+double FeatureTracker::GetMaxHeightInFootprint(double x, double y, double footprint_l)
+{
+    double mxheight=0;
+    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=0.2)
+        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=0.2)
+        {
+            double h = World::Instance()->GetHeight(i,j);
+            mxheight = (mxheight < h)?h:mxheight;
+        }
+    return mxheight;
+}
 
 void FeatureTracker::ExecuteCoveragePlan(double w_w, double w_l, double flying_height, double step_l)
 {
@@ -274,7 +297,7 @@ void FeatureTracker::ExecuteCoveragePlan(double w_w, double w_l, double flying_h
         {
             double y = startPoint[1] + footPrint_l/2 + ((double)j)*footPrint_l;
 
-            double scanHeight = flying_height+World::Instance()->GetHeight(x,y);
+            double scanHeight = flying_height+GetMaxHeightInFootprint(x,y,footPrint_l);//World::Instance()->GetHeight(x,y);
             if(!pathWPs.empty())
             {
                 Vector<3,double>  prevWP = (pathWPs.back());
@@ -314,11 +337,13 @@ void FeatureTracker::GoToNextWP(double step_l)
     for(int i=0; i+1 < pathWPs.size(); i++)
     {
         double wpd = sqrt((pathWPs[i+1]-pathWPs[i])*(pathWPs[i+1]-pathWPs[i]));
-        for(int j =0; j< ceil(wpd/step_l); j++)
+        for(int j =0; j< floor(wpd/step_l); j++)
         {
             //SetPose(/*pose + (step_l/wpd)*(pathWPs[i+1]-pathWPs[i])*/pathWPs[i]);
             MoveSensor((step_l/wpd)*(pathWPs[i+1]-pathWPs[i]));
         }
+
+        MoveSensorTo(pathWPs[i+1]);
 
         if(pathWPs.size() == 2)
         {

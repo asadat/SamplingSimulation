@@ -2,18 +2,27 @@ cmake_minimum_required(VERSION 2.4.6 FATAL_ERROR)
 
 SET(ProjName SamplingSimulation)
 
-include_directories("include")
-include_directories("/usr/local/include/TooN")
+#include_directories("include")
+#include_directories("/usr/local/include/TooN")
+#include_directories("/usr/include")
+#include_directories("/opt/X11/include")
+#include_directories("/opt/local/include")
+
+
+#link_directories("/opt/X11/lib")
+#link_directories("/usr/lib/x86_64-linux-gnu")
+#link_directories("/usr/local/lib/TooN")
+#link_directories("/opt/local/lib")
+
+
+include_directories("./include")
+include_directories("./TooN/include")
 include_directories("/usr/include")
-include_directories("/opt/X11/include")
-include_directories("/opt/local/include")
 
 #link_directories(${PCL_LIBRARY_DIRS})
 #link_directories("G:/Matlab/extern/lib/win32/microsoft")
-link_directories("/opt/X11/lib")
 link_directories("/usr/lib/x86_64-linux-gnu")
-link_directories("/usr/local/lib/TooN")
-link_directories("/opt/local/lib")
+link_directories("/usr/lib")
 
 set(Samp_LIBRARIES GL GLU glut gmp CGAL CGAL_Core)
 

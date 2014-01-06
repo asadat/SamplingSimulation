@@ -26,7 +26,7 @@ public:
     void DrawFrustum(Vector<3, double> camp, double size);
 
     void MoveSensor(TooN::Vector<3,double> dPos);
-
+    void MoveSensorTo(TooN::Vector<3,double> pos);
     void ToggleDrawEntropyField(){bDrawEntropy = !bDrawEntropy;}
     void ToggleSensing(){ bSensing =! bSensing;}
     void ClearHistory();
@@ -40,6 +40,7 @@ public:
 
 private:
 
+    double GetMaxHeightInFootprint(double x, double y, double footprint_l);
     void GenerateFeatures(int size, Vector<3, double> viewpoint);
     std::vector<Feature> TrackFeatures(TooN::Vector<3, double> viewpoint);
     void UpdateMatchedFeatures();

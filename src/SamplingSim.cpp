@@ -159,7 +159,7 @@ void update_event(int ms)
             featureTracker.ExecuteCoveragePlan(World::Instance()->GetWidth(), World::Instance()->GetLength(), featureTracker.GetSensorPose()[2] , 0.25);
         }
 
-        featureTracker.GoToNextWP(0.5);
+        featureTracker.GoToNextWP(0.25);
         doUpdate = true;
     }
 
