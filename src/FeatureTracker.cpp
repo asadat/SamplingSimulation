@@ -6,6 +6,7 @@
 
 //#define RAND(a,b)    a+((double)(b-a))*((double)(rand()%1000))/1000
 #define MIN_FEATURES    50
+#define MAX(a,b)    (a>b)?a:b
 
 FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
 {
@@ -67,15 +68,16 @@ void FeatureTracker::glDraw()
     glColor3f(1,0,0);
     glPointSize(5);
 
-
-    for(int i=0; i<fs.size(); i++)
+    if(false)
     {
-        glPointSize(5*fs[i].size);
-        glBegin(GL_POINTS);
-        glVertex3f(fs[i].pos[0], fs[i].pos[1], fs[i].pos[2]+0.01);
-        glEnd();
+        for(int i=0; i<fs.size(); i++)
+        {
+            glPointSize(5*fs[i].size);
+            glBegin(GL_POINTS);
+            glVertex3f(fs[i].pos[0], fs[i].pos[1], fs[i].pos[2]+0.01);
+            glEnd();
+        }
     }
-
     // draw matched features
 //    glColor3f(1,0,1);
 //    for(int i=0; i<matchedFeatures.size(); i++)
@@ -154,6 +156,40 @@ void FeatureTracker::SetPose(Vector<3, double> newpose)
         UpdateMatchedFeatures();
     }
 
+}
+double FeatureTracker::GetSamplingLevels(int &level)
+{
+    return ((double)level) * 0.5;
+    //double wl = World::Instance()->GetLength();
+    if(level<1)
+        level = 1;
+
+
+    double ww = World::Instance()->GetWidth();
+
+    double max_l = ww;//MAX(wl,ww);
+
+    double dv=1;
+    for(int i=0;i<level-1; i++)
+    {
+        dv*=2;
+    }
+    double result = (0.5*max_l/dv)*tan(FOV/2);
+    if(result < World::Instance()->GetMaxHeight())
+    {
+        if(level <=1)
+        {
+            printf("Too high world!!");
+            return 0;
+        }
+        else
+        {
+            printf("Too no lower level!! At level: %d", level);
+            return GetSamplingLevels(--level);
+        }
+    }
+    else
+        return result;
 }
 
 void FeatureTracker::GenerateFeatures(int size, Vector<3, double> viewpoint)
@@ -238,7 +274,29 @@ void FeatureTracker::ExecuteCoveragePlan(double w_w, double w_l, double flying_h
         {
             double y = startPoint[1] + footPrint_l/2 + ((double)j)*footPrint_l;
 
-            pathWPs.push_back(makeVector(x,y, flying_height));
+            double scanHeight = flying_height+World::Instance()->GetHeight(x,y);
+            if(!pathWPs.empty())
+            {
+                Vector<3,double>  prevWP = (pathWPs.back());
+                if(fabs(scanHeight-prevWP[2])<0.001)
+                {
+                    pathWPs.push_back(makeVector(x,y, scanHeight));
+                }
+                else if(prevWP[2] < scanHeight)
+                {
+                    pathWPs.push_back(makeVector(prevWP[0],prevWP[1], scanHeight));
+                    pathWPs.push_back(makeVector(x,y, scanHeight));
+                }
+                else
+                {
+                    pathWPs.push_back(makeVector(x,y, prevWP[2]));
+                    pathWPs.push_back(makeVector(x,y, scanHeight));
+                }
+            }
+            else
+            {
+                pathWPs.push_back(makeVector(x,y, scanHeight));
+            }
 
             nextPath.push_back(makeVector(x+footPrint_l/4,y+footPrint_l/4, flying_height));
             nextPath.push_back(makeVector(x+footPrint_l/4,y-footPrint_l/4, flying_height));

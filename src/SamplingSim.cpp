@@ -112,16 +112,27 @@ void update_event(int ms)
         doUpdate = true;
     }
 
-    if(Key['o'])
-    {
-        featureTracker.MoveSensor(makeVector(0,0,0.1));
-        doUpdate = true;
-    }
-
+    static int levels=1;
     if(Key['l'])
     {
-        featureTracker.MoveSensor(makeVector(0,0,-0.1));
-        doUpdate = true;
+        Vector<3, double> p= featureTracker.GetSensorPose();
+
+        p[2] = featureTracker.GetSamplingLevels(++levels);
+
+        featureTracker.SetPose(p);
+        //doUpdate = true;
+        printf("lev: %d\n",levels);
+    }
+
+    if(Key['o'])
+    {
+        Vector<3, double> p= featureTracker.GetSensorPose();
+
+        p[2] = featureTracker.GetSamplingLevels(--levels);
+
+        featureTracker.SetPose(p);
+        //doUpdate = true;
+        printf("lev: %d\n",levels);
     }
 
     if(Key['1'])
@@ -145,7 +156,7 @@ void update_event(int ms)
         if(generatePlan)
         {
             generatePlan = false;
-            featureTracker.ExecuteCoveragePlan(World::Instance()->GetWorldWidth(), World::Instance()->GetWorldLength(), featureTracker.GetSensorPose()[2] , 0.5);
+            featureTracker.ExecuteCoveragePlan(World::Instance()->GetWidth(), World::Instance()->GetLength(), featureTracker.GetSensorPose()[2] , 0.25);
         }
 
         featureTracker.GoToNextWP(0.5);

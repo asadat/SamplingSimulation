@@ -1,5 +1,5 @@
 #include "TooN/TooN.h"
-#include <CNearTree.h>
+//#include <CNearTree.h>
 #include <Visualizer.h>
 
 #include "MeshCreator.h"
@@ -35,11 +35,12 @@ public:
 
     void GoToNextWP(double step_l);
     Vector<3, double> GetSensorPose(){return pose;}
+    double GetSamplingLevels(int &level);
+    void SetPose(Vector<3, double> newpose);
 
 private:
 
     void GenerateFeatures(int size, Vector<3, double> viewpoint);
-    void SetPose(Vector<3, double> newpose);
     std::vector<Feature> TrackFeatures(TooN::Vector<3, double> viewpoint);
     void UpdateMatchedFeatures();
     bool InsideFOV(Feature f, Vector<3, double> pos);

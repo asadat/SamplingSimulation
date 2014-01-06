@@ -1,7 +1,8 @@
 #include "World.h"
 
-#define WORLD_WIDTH     20
-#define WORLD_LENGTH    20
+#define WORLD_WIDTH     50
+#define WORLD_LENGTH    50
+#define WORLD_MAX_HEIGHT    5
 
 World* World::instance = NULL;
 
@@ -18,10 +19,8 @@ World::World():Visualizer()
     // floor
 
 
-    int n=10;
+    int n = WORLD_WIDTH*WORLD_LENGTH/40;
     double maxL = 3;
-    double maxH = 1.5;
-
 
     InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);
 
@@ -33,7 +32,7 @@ World::World():Visualizer()
         ly = RAND(1, maxL/2);
         x = RAND((-worldW/2+lx),(worldW/2-lx));
         y = RAND((-worldL/2+ly),(worldL/2-ly));
-        z = RAND(1, maxH);
+        z = RAND(1, WORLD_MAX_HEIGHT);
 
         InsertPlane(x-lx, y+ly, z, x+lx, y-ly, z);
     }
@@ -294,12 +293,17 @@ void World::ToggleDraw()
     }
 }
 
-double World::GetWorldLength()
+double World::GetMaxHeight()
+{
+    return WORLD_MAX_HEIGHT;
+}
+
+double World::GetLength()
 {
     return WORLD_LENGTH;
 }
 
-double World::GetWorldWidth()
+double World::GetWidth()
 {
     return WORLD_WIDTH;
 }
