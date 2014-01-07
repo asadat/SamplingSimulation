@@ -36,7 +36,8 @@ add_executable (${ProjName}
 	    src/FeatureTracker.cpp
             src/Visualizer.cpp
             src/MeshCreator.cpp
-
+	    src/TSP.cpp
+	    include/TSP.h
             include/MeshCreator.h
 	    include/FeatureTracker.h
             include/World.h

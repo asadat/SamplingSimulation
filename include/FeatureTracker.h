@@ -1,8 +1,9 @@
 #include "TooN/TooN.h"
 //#include <CNearTree.h>
 #include <Visualizer.h>
-
 #include "MeshCreator.h"
+#include "TSP.h"
+
 
 #define     DEG2RAD     3.14/180
 #define     FOV         92*DEG2RAD
@@ -62,6 +63,8 @@ private:
     vector< Vector<3, double> > nextPath;
     vector<double> entropies;
 
+    vector<Entity*> shortestPath;
+    TSP tsp;
 
 };
 

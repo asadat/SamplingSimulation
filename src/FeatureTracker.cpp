@@ -1,16 +1,21 @@
 #include "FeatureTracker.h"
 #include "GL/gl.h"
 #include "World.h"
-
 #include <stdio.h>
 
 //#define RAND(a,b)    a+((double)(b-a))*((double)(rand()%1000))/1000
+//#define RAND(a,b)    (a)+((b)-(a))*((double)(rand()%1000))/1000
 #define MIN_FEATURES    50
 #define MAX(a,b)    (a>b)?a:b
+
+
 
 FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
 {
     srand(time(NULL));
+
+
+
     SetPose(startPos);
 
 //    for(int i=0; i< 1000; i++)
@@ -23,6 +28,36 @@ FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
 
 //        features.push_back(f);
 //    }
+
+//    vector<Entity*> ev;
+//    for(int i=0;i<10; i++)
+//    {
+//        double ww = 5;
+//        double wl = 5;
+//        Vector<3> p = makeVector(pow(-1,i)*i,i,4);//*/makeVector(RAND(-ww/2,ww/2), RAND(-wl/2,wl/2), 4);
+//        Entity * en = new Entity();
+//        en->pos = p;
+//        if(i==0)
+//            en->start = true;
+//        else
+//            en->start = false;
+
+//        ev.push_back(en);
+//    }
+
+//    Vector<3> p = makeVector(101,1,4);//*/makeVector(RAND(-ww/2,ww/2), RAND(-wl/2,wl/2), 4);
+//    Entity * en1 = new Entity();
+//    en1->pos = p;
+//    en1->start = false;
+//    ev.push_back(en1);
+
+//    p = makeVector(100,1,4);//*/makeVector(RAND(-ww/2,ww/2), RAND(-wl/2,wl/2), 4);
+//    Entity * en2 = new Entity();
+//    en2->pos = p;
+//    en2->start = false;
+//    ev.push_back(en2);
+
+   // shortestPath = tsp.GetShortestPath(ev);
 
 }
 
@@ -107,6 +142,28 @@ void FeatureTracker::glDraw()
             glBegin(GL_LINES);
             glVertex3f(pathWPs[i][0],pathWPs[i][1],pathWPs[i][2]);
             glVertex3f(pathWPs[i+1][0],pathWPs[i+1][1],pathWPs[i+1][2]);
+            glEnd();
+        }
+    }
+
+
+    for(int i=0; i<shortestPath.size(); i++)
+    {
+       // DrawFrustum(pathWPs[i], pathWPs[i][2]);
+        glColor3f(0,1,0);
+        glPointSize(10);
+        glBegin(GL_POINTS);
+        glVertex3f(shortestPath[i]->pos[0], shortestPath[i]->pos[1], shortestPath[i]->pos[2]);
+        glEnd();
+
+
+        if(i+1<shortestPath.size())
+        {
+            glColor3f(0.1*((double)i),0,0);
+            glLineWidth(3);
+            glBegin(GL_LINES);
+            glVertex3f(shortestPath[i]->pos[0],shortestPath[i]->pos[1],shortestPath[i]->pos[2]);
+            glVertex3f(shortestPath[i+1]->pos[0],shortestPath[i+1]->pos[1],shortestPath[i+1]->pos[2]);
             glEnd();
         }
     }
