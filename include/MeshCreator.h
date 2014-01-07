@@ -1,3 +1,6 @@
+#ifndef MESH_CREATOR_
+#define MESH_CREATOR_
+
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Projection_traits_xy_3.h>
 #include <CGAL/Delaunay_triangulation_2.h>
@@ -27,3 +30,5 @@ private:
     Delaunay mesh;
 
 };
+
+#endif

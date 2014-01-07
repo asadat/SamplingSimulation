@@ -16,6 +16,7 @@ SET(ProjName SamplingSimulation)
 
 
 include_directories("./include")
+include_directories("./include/tree")
 include_directories("./TooN/include")
 include_directories("/usr/include")
 
@@ -37,10 +38,13 @@ add_executable (${ProjName}
             src/Visualizer.cpp
             src/MeshCreator.cpp
 	    src/TSP.cpp
+	    src/Drone.cpp
+            include/Drone.h
 	    include/TSP.h
             include/MeshCreator.h
 	    include/FeatureTracker.h
             include/World.h
-            include/Visualizer.h )
+            include/Visualizer.h
+            include/SamplingSim.h )
 
 target_link_libraries (${ProjName} ${Samp_LIBRARIES})

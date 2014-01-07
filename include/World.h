@@ -1,3 +1,6 @@
+#ifndef WORLD_
+#define WORLD_
+
 #include <GL/glut.h>
 #include "Visualizer.h"
 #include "TooN/TooN.h"
@@ -65,3 +68,5 @@ private:
     bool bDraw;
 
 };
+
+#endif

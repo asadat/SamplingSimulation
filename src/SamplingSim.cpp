@@ -1,13 +1,20 @@
+#include "SamplingSim.h"
 #include "GL/glut.h"
 #include "TooN/TooN.h"
 #include <map>
 #include "World.h"
 #include "FeatureTracker.h"
+#include <sys/time.h>
 
 using namespace TooN;
 
+SamplingSim * SamplingSim::instance = NULL;
+
 unsigned int updateMS = 33;
 bool doUpdate = false;
+bool ScanRunning = false;
+timeval last_time;
+bool firstFrame = true;
 
 std::map<unsigned char, bool> Key;
 bool Mouse_Left, Mouse_Right, Mouse_Middle;
@@ -38,11 +45,13 @@ void rotateCamera(double yaw, double pitch, double roll)
 
 void update_event(int ms)
 {
-    static FeatureTracker featureTracker(makeVector(0,0,3));
+   // static FeatureTracker featureTracker(makeVector(0,0,3));
+
     static bool firsttime =true;
 
     if(firsttime)
     {
+
         //featureTracker.ExecuteCoveragePlan(World::Instance()->GetWorldWidth(), World::Instance()->GetWorldLength(), 2, 0.5);
         firsttime = false;
     }
@@ -90,47 +99,48 @@ void update_event(int ms)
 
     if(Key['u'])
     {
-        featureTracker.MoveSensor(makeVector(0,0.1,0));
+        //SamplingSim::Instance()->drone.sensor
+        SamplingSim::Instance()->drone.sensor.MoveSensor(makeVector(0,0.1,0));
         doUpdate = true;
     }
 
     if(Key['j'])
     {
-        featureTracker.MoveSensor(makeVector(0,-0.1,0));
+        SamplingSim::Instance()->drone.sensor.MoveSensor(makeVector(0,-0.1,0));
         doUpdate = true;
     }
 
     if(Key['h'])
     {
-        featureTracker.MoveSensor(makeVector(-0.1,0,0));
+        SamplingSim::Instance()->drone.sensor.MoveSensor(makeVector(-0.1,0,0));
         doUpdate = true;
     }
 
     if(Key['k'])
     {
-        featureTracker.MoveSensor(makeVector(0.1,0,0));
+        SamplingSim::Instance()->drone.sensor.MoveSensor(makeVector(0.1,0,0));
         doUpdate = true;
     }
 
     static int levels=1;
     if(Key['l'])
     {
-        Vector<3, double> p= featureTracker.GetSensorPose();
+        Vector<3, double> p= SamplingSim::Instance()->drone.sensor.GetSensorPose();
 
-        p[2] = featureTracker.GetSamplingLevels(++levels);
+        p[2] = SamplingSim::Instance()->drone.sensor.GetSamplingLevels(++levels);
 
-        featureTracker.SetPose(p);
+        SamplingSim::Instance()->drone.sensor.SetPose(p);
         //doUpdate = true;
         printf("lev: %d\n",levels);
     }
 
     if(Key['o'])
     {
-        Vector<3, double> p= featureTracker.GetSensorPose();
+        Vector<3, double> p= SamplingSim::Instance()->drone.sensor.GetSensorPose();
 
-        p[2] = featureTracker.GetSamplingLevels(--levels);
+        p[2] = SamplingSim::Instance()->drone.sensor.GetSamplingLevels(--levels);
 
-        featureTracker.SetPose(p);
+        SamplingSim::Instance()->drone.sensor.SetPose(p);
         //doUpdate = true;
         printf("lev: %d\n",levels);
     }
@@ -142,12 +152,12 @@ void update_event(int ms)
 
     if(Key['2'])
     {
-        featureTracker.ToggleSensing();
+        SamplingSim::Instance()->drone.sensor.ToggleSensing();
     }
 
     if(Key['3'])
     {
-        featureTracker.ToggleDrawEntropyField();
+        SamplingSim::Instance()->drone.sensor.ToggleDrawEntropyField();
     }
 
     static bool generatePlan = true;
@@ -156,17 +166,49 @@ void update_event(int ms)
         if(generatePlan)
         {
             generatePlan = false;
-            featureTracker.ExecuteCoveragePlan(World::Instance()->GetWidth(), World::Instance()->GetLength(), featureTracker.GetSensorPose()[2] , 0.25);
+            SamplingSim::Instance()->drone.sensor.ExecuteCoveragePlan(World::Instance()->GetWidth(),
+                         World::Instance()->GetLength(), SamplingSim::Instance()->drone.sensor.GetSensorPose()[2]);
         }
 
-        featureTracker.GoToNextWP(0.25);
+        ScanRunning=true;
+        //featureTracker.GoToNextWP(0.25);
         doUpdate = true;
+
+        if(ScanRunning)
+        {
+
+             timeval seconds;
+             gettimeofday(&seconds, NULL);
+             //printf("seconds: %f /n", seconds);
+
+             double elapsedTime = (-last_time.tv_sec + seconds.tv_sec) * 1000.0;      // sec to ms
+             elapsedTime += (-last_time.tv_usec + seconds.tv_usec) / 1000.0;   // us to ms
+
+             if(elapsedTime/1000.0 > 0.5)
+                 firstFrame = true;
+
+             if(firstFrame)
+             {
+                 printf("First Time /n");
+                 last_time = seconds;
+                 firstFrame = false;
+             }
+
+             elapsedTime = (-last_time.tv_sec + seconds.tv_sec) * 1000.0;      // sec to ms
+             elapsedTime += (-last_time.tv_usec + seconds.tv_usec) / 1000.0;   // us to ms
+
+             SamplingSim::Instance()->drone.sensor.GoToNextWP(5.0*(elapsedTime/1000.0));
+
+             last_time = seconds;
+
+        }
     }
 
     if(Key['-'])
     {
+        firstFrame = true;
         generatePlan = true;
-        featureTracker.ClearHistory();
+        SamplingSim::Instance()->drone.sensor.ClearHistory();
     }
 
     if(Mouse_Right)
@@ -185,6 +227,7 @@ void update_event(int ms)
 
 void idle_event()
 {
+    SamplingSim::Instance()->idle();
     //if(!ros::ok())
     // exit(0);
 }
@@ -193,6 +236,8 @@ void idle_event()
 
 void render_event()
 {
+
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // reset camera
@@ -316,54 +361,63 @@ void keyboard_up_event(unsigned char key, int x, int y)
     Key[key] = false;
 }
 
+SamplingSim::SamplingSim(int *argc, char **argv)
+{
+    world = World::Instance();
+    // init GLUT
+    glutInit(argc, argv);
+}
+
+SamplingSim::~SamplingSim()
+{
+
+}
+
+void SamplingSim::idle()
+{
+
+}
+
+void SamplingSim::mainLoop()
+{
+    glutInitWindowSize(800, 600);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH);
+    glutCreateWindow("SamplingSim");
+    glClearColor(1,1,1,0);
+    glEnable(GL_POINT_SMOOTH);
+
+    // register callbacks
+    glutDisplayFunc(render_event);
+    glutReshapeFunc(resize_event);
+    glutKeyboardFunc(keyboard_event);
+    glutKeyboardUpFunc(keyboard_up_event);
+    glutMouseFunc(mouse_event);
+    glutTimerFunc(updateMS, update_event, updateMS);
+    glutIdleFunc(idle_event);
+    glutMotionFunc(mouse_drag_event);
+    glutPassiveMotionFunc(mouse_move_event);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
+    // define global state
+    glDisable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    glutIgnoreKeyRepeat(true);
+
+    translateCamera(0, 0, 1);
+
+    // run glut
+    glutMainLoop();
+}
 
 int main(int argc, char **argv)
 {
-
     printf("\n");
     printf("\t1 ....... Toggle Environment Drawing\n");
     printf("\t2 ....... Toggle Sensing\n\n");
+    SamplingSim::Instance(&argc, argv);
+    SamplingSim::Instance()->mainLoop();
 
-    World::Instance();
-
-
-       // Cam_Target= TooN::makeVector(0, -10, 10);
-      //  Cam_Rotation= TooN::makeVector(0, -0.8, 0);
-
-        // init GLUT
-        glutInit(&argc, argv);
-        // build our window
-        glutInitWindowSize(800, 600);
-        glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH);
-        glutCreateWindow("SamplingSim");
-        glClearColor(1,1,1,0);
-        glEnable(GL_POINT_SMOOTH);
-
-
-        // register callbacks
-        glutDisplayFunc(render_event);
-        glutReshapeFunc(resize_event);
-        glutKeyboardFunc(keyboard_event);
-        glutKeyboardUpFunc(keyboard_up_event);
-        glutMouseFunc(mouse_event);
-        glutTimerFunc(updateMS, update_event, updateMS);
-        glutIdleFunc(idle_event);
-        glutMotionFunc(mouse_drag_event);
-        glutPassiveMotionFunc(mouse_move_event);
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-        // define global state
-        glDisable(GL_LIGHTING);
-        glEnable(GL_DEPTH_TEST);
-        glutIgnoreKeyRepeat(true);
-
-        translateCamera(0, 0, 1);
-
-
-        // run glut
-        glutMainLoop();
-
-        return 0;
+    return 0;
 }

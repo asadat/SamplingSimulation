@@ -44,7 +44,7 @@ void MeshCreator::glDraw()
     glEnd();
 
     //Fill
-    double hR = 5;
+    double hR = 10;
     glColor3f(0.8,0.6,1);
     glLineWidth(2);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -56,7 +56,14 @@ void MeshCreator::glDraw()
         p[1] = fit->vertex(1)->point();
         p[2] = fit->vertex(2)->point();
 
-        glColor3f(1-(p[0].z()+p[1].z()+p[2].z())/hR,1-(p[0].z()+p[1].z()+p[2].z())/hR,0.8);
+        double dz[3];
+        dz[0] = fabs(p[0].z() - p[1].z());
+        dz[1] = fabs(p[0].z() - p[2].z());
+        dz[2] = fabs(p[2].z() - p[1].z());
+        double cc = dz[0]+dz[1]+dz[2];
+
+        //glColor3f(1-(p[0].z()+p[1].z()+p[2].z())/hR,1-(p[0].z()+p[1].z()+p[2].z())/hR,0.8);
+        glColor3f(1-cc/hR,1-cc/hR,0.8);
 
         glVertex3f(p[0].x(), p[0].y(), p[0].z());
         glVertex3f(p[1].x(), p[1].y(), p[1].z());

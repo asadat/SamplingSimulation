@@ -1,3 +1,6 @@
+#ifndef FEATURE_TRACKER_
+#define FEATURE_TRACKER_
+
 #include "TooN/TooN.h"
 //#include <CNearTree.h>
 #include <Visualizer.h>
@@ -32,7 +35,7 @@ public:
     void ToggleSensing(){ bSensing =! bSensing;}
     void ClearHistory();
 
-    void ExecuteCoveragePlan(double w_w, double w_l, double flying_height, double step_l);
+    void ExecuteCoveragePlan(double w_w, double w_l, double flying_height);
 
     void GoToNextWP(double step_l);
     Vector<3, double> GetSensorPose(){return pose;}
@@ -68,3 +71,4 @@ private:
 
 };
 
+#endif

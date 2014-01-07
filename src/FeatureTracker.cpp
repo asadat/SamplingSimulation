@@ -2,12 +2,10 @@
 #include "GL/gl.h"
 #include "World.h"
 #include <stdio.h>
-
 //#define RAND(a,b)    a+((double)(b-a))*((double)(rand()%1000))/1000
 //#define RAND(a,b)    (a)+((b)-(a))*((double)(rand()%1000))/1000
 #define MIN_FEATURES    50
 #define MAX(a,b)    (a>b)?a:b
-
 
 
 FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
@@ -263,7 +261,6 @@ double FeatureTracker::GetSamplingLevels(int &level)
 
 void FeatureTracker::GenerateFeatures(int size, Vector<3, double> viewpoint)
 {
-
     for(int i=0; i< size; i++)
     {
         Feature f;
@@ -330,7 +327,7 @@ double FeatureTracker::GetMaxHeightInFootprint(double x, double y, double footpr
     return mxheight;
 }
 
-void FeatureTracker::ExecuteCoveragePlan(double w_w, double w_l, double flying_height, double step_l)
+void FeatureTracker::ExecuteCoveragePlan(double w_w, double w_l, double flying_height)
 {
     bSensing = false;
 
@@ -354,8 +351,8 @@ void FeatureTracker::ExecuteCoveragePlan(double w_w, double w_l, double flying_h
         {
             double y = startPoint[1] + footPrint_l/2 + ((double)j)*footPrint_l;
 
-            double scanHeight = flying_height+GetMaxHeightInFootprint(x,y,footPrint_l);//World::Instance()->GetHeight(x,y);
-            if(!pathWPs.empty())
+            double scanHeight = flying_height;//+GetMaxHeightInFootprint(x,y,footPrint_l);//World::Instance()->GetHeight(x,y);
+            if(false && !pathWPs.empty())
             {
                 Vector<3,double>  prevWP = (pathWPs.back());
                 if(fabs(scanHeight-prevWP[2])<0.001)
@@ -390,26 +387,29 @@ void FeatureTracker::ExecuteCoveragePlan(double w_w, double w_l, double flying_h
 
 void FeatureTracker::GoToNextWP(double step_l)
 {
+    //printf("%f \n",step_l);
     bSensing = true;
     for(int i=0; i+1 < pathWPs.size(); i++)
     {
-        double wpd = sqrt((pathWPs[i+1]-pathWPs[i])*(pathWPs[i+1]-pathWPs[i]));
-        for(int j =0; j< floor(wpd/step_l); j++)
+        double wpd = sqrt((pathWPs[i+1]-pose/*pathWPs[i]*/)*(pathWPs[i+1]-pose/*pathWPs[i]*/));
+        //for(int j =0; j< floor(wpd/step_l); j++)
         {
-            //SetPose(/*pose + (step_l/wpd)*(pathWPs[i+1]-pathWPs[i])*/pathWPs[i]);
-            MoveSensor((step_l/wpd)*(pathWPs[i+1]-pathWPs[i]));
+            MoveSensor((step_l/wpd)*(pathWPs[i+1]-pose/*pathWPs[i]*/));
         }
 
-        MoveSensorTo(pathWPs[i+1]);
+       // MoveSensorTo(pathWPs[i+1]);
 
-        if(pathWPs.size() == 2)
+        if(wpd < step_l)
         {
-            OnPlanExecuted();
-            pathWPs.clear();
-        }
-        else
-        {
-            pathWPs.erase(pathWPs.begin());
+            if(pathWPs.size() == 2)
+            {
+                OnPlanExecuted();
+                pathWPs.clear();
+            }
+            else
+            {
+                pathWPs.erase(pathWPs.begin());
+            }
         }
 
         break;

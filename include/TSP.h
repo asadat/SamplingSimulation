@@ -1,3 +1,6 @@
+#ifndef TSP_
+#define TSP_
+
 #include "Visualizer.h"
 #include "TooN/TooN.h"
 #include <vector>
@@ -47,3 +50,5 @@ class TSP: public Visualizer
 
 
 };
+
+#endif
