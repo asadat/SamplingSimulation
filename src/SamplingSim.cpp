@@ -3,7 +3,7 @@
 #include "TooN/TooN.h"
 #include <map>
 #include "World.h"
-#include "FeatureTracker.h"
+//#include "FeatureTracker.h"
 #include <sys/time.h>
 
 using namespace TooN;
@@ -59,6 +59,7 @@ void update_event(int ms)
 
     doUpdate = false; // any change and we go again. If we don't change anything, we stop updating
 
+    SamplingSim::Instance()->hanldeKeyPressed(Key, doUpdate);
     // actions:
     // - W or Left_Mouse = Move Forward constant rate
     // - S or Middle_Mouse = Move Backward constant rate
@@ -97,119 +98,7 @@ void update_event(int ms)
         translateCamera(0, 0, -moveRate);
 
 
-    if(Key['u'])
-    {
-        //SamplingSim::Instance()->drone.sensor
-        SamplingSim::Instance()->drone.sensor.MoveSensor(makeVector(0,0.1,0));
-        doUpdate = true;
-    }
 
-    if(Key['j'])
-    {
-        SamplingSim::Instance()->drone.sensor.MoveSensor(makeVector(0,-0.1,0));
-        doUpdate = true;
-    }
-
-    if(Key['h'])
-    {
-        SamplingSim::Instance()->drone.sensor.MoveSensor(makeVector(-0.1,0,0));
-        doUpdate = true;
-    }
-
-    if(Key['k'])
-    {
-        SamplingSim::Instance()->drone.sensor.MoveSensor(makeVector(0.1,0,0));
-        doUpdate = true;
-    }
-
-    static int levels=1;
-    if(Key['l'])
-    {
-        Vector<3, double> p= SamplingSim::Instance()->drone.sensor.GetSensorPose();
-
-        p[2] = SamplingSim::Instance()->drone.sensor.GetSamplingLevels(++levels);
-
-        SamplingSim::Instance()->drone.sensor.SetPose(p);
-        //doUpdate = true;
-        printf("lev: %d\n",levels);
-    }
-
-    if(Key['o'])
-    {
-        Vector<3, double> p= SamplingSim::Instance()->drone.sensor.GetSensorPose();
-
-        p[2] = SamplingSim::Instance()->drone.sensor.GetSamplingLevels(--levels);
-
-        SamplingSim::Instance()->drone.sensor.SetPose(p);
-        //doUpdate = true;
-        printf("lev: %d\n",levels);
-    }
-
-    if(Key['1'])
-    {
-        World::Instance()->ToggleDraw();
-    }
-
-    if(Key['2'])
-    {
-        SamplingSim::Instance()->drone.sensor.ToggleSensing();
-    }
-
-    if(Key['3'])
-    {
-        SamplingSim::Instance()->drone.sensor.ToggleDrawEntropyField();
-    }
-
-    static bool generatePlan = true;
-    if(Key['='])
-    {
-        if(generatePlan)
-        {
-            generatePlan = false;
-            SamplingSim::Instance()->drone.sensor.ExecuteCoveragePlan(World::Instance()->GetWidth(),
-                         World::Instance()->GetLength(), SamplingSim::Instance()->drone.sensor.GetSensorPose()[2]);
-        }
-
-        ScanRunning=true;
-        //featureTracker.GoToNextWP(0.25);
-        doUpdate = true;
-
-        if(ScanRunning)
-        {
-
-             timeval seconds;
-             gettimeofday(&seconds, NULL);
-             //printf("seconds: %f /n", seconds);
-
-             double elapsedTime = (-last_time.tv_sec + seconds.tv_sec) * 1000.0;      // sec to ms
-             elapsedTime += (-last_time.tv_usec + seconds.tv_usec) / 1000.0;   // us to ms
-
-             if(elapsedTime/1000.0 > 0.5)
-                 firstFrame = true;
-
-             if(firstFrame)
-             {
-                 printf("First Time /n");
-                 last_time = seconds;
-                 firstFrame = false;
-             }
-
-             elapsedTime = (-last_time.tv_sec + seconds.tv_sec) * 1000.0;      // sec to ms
-             elapsedTime += (-last_time.tv_usec + seconds.tv_usec) / 1000.0;   // us to ms
-
-             SamplingSim::Instance()->drone.sensor.GoToNextWP(5.0*(elapsedTime/1000.0));
-
-             last_time = seconds;
-
-        }
-    }
-
-    if(Key['-'])
-    {
-        firstFrame = true;
-        generatePlan = true;
-        SamplingSim::Instance()->drone.sensor.ClearHistory();
-    }
 
     if(Mouse_Right)
     {
@@ -373,9 +262,104 @@ SamplingSim::~SamplingSim()
 
 }
 
+void SamplingSim::hanldeKeyPressed(std::map<unsigned char, bool> &key, bool &updateKey)
+{
+    updateKey = true;
+
+    if(key['u'])
+    {
+        //SamplingSim::Instance()->drone.sensor
+        drone.MoveSensor(makeVector(0,0.1,0));
+    }
+
+    if(key['j'])
+    {
+        drone.MoveSensor(makeVector(0,-0.1,0));
+    }
+
+    if(key['h'])
+    {
+        drone.MoveSensor(makeVector(-0.1,0,0));
+    }
+
+    if(key['k'])
+    {
+        drone.MoveSensor(makeVector(0.1,0,0));
+    }
+
+   // static int levels=1;
+    if(key['l'])
+    {
+        drone.GoLevelDown();
+        updateKey = false;
+    }
+
+    if(key['o'])
+    {
+        drone.GoLevelUp();
+        updateKey = false;
+    }
+
+    if(key['1'])
+    {
+        world->ToggleDraw();
+        updateKey = false;
+    }
+
+    if(key['2'])
+    {
+        drone.ToggleStealthMode();
+        //drone.sensor.ToggleSensing();
+        updateKey = false;
+    }
+
+    if(key['3'])
+    {
+        drone.ToggleDrawEntropy();
+        //drone.sensor.ToggleDrawEntropyField();
+        updateKey = false;
+    }
+
+    //static bool generatePlan = true;
+    if(key['='])
+    {
+        drone.ExecutePlan();
+
+//        if(generatePlan)
+//        {
+//            generatePlan = false;
+
+//        }
+
+//        ScanRunning=true;
+//        //featureTracker.GoToNextWP(0.25);
+
+
+//        if(ScanRunning)
+//        {
+
+
+
+//        }
+    }
+
+    if(key['-'])
+    {
+        drone.DestroyPlan();
+//        firstFrame = true;
+//        generatePlan = true;
+
+    }
+
+    if(key['0'])
+    {
+        drone.GeneratePlan();
+    }
+}
+
 void SamplingSim::idle()
 {
-
+    drone.Update();
 }
 
 void SamplingSim::mainLoop()

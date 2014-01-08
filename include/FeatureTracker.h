@@ -5,7 +5,6 @@
 //#include <CNearTree.h>
 #include <Visualizer.h>
 #include "MeshCreator.h"
-#include "TSP.h"
 
 
 #define     DEG2RAD     3.14/180
@@ -31,13 +30,12 @@ public:
 
     void MoveSensor(TooN::Vector<3,double> dPos);
     void MoveSensorTo(TooN::Vector<3,double> pos);
+
     void ToggleDrawEntropyField(){bDrawEntropy = !bDrawEntropy;}
     void ToggleSensing(){ bSensing =! bSensing;}
+    void TurnOnSensing(bool on){bSensing = on;}
     void ClearHistory();
 
-    void ExecuteCoveragePlan(double w_w, double w_l, double flying_height);
-
-    void GoToNextWP(double step_l);
     Vector<3, double> GetSensorPose(){return pose;}
     double GetSamplingLevels(int &level);
     void SetPose(Vector<3, double> newpose);
@@ -61,13 +59,7 @@ private:
     double footprint_length;
     bool bDrawEntropy;
 
-    //executed path
-    vector< Vector<3, double> > pathWPs;
-    vector< Vector<3, double> > nextPath;
     vector<double> entropies;
-
-    vector<Entity*> shortestPath;
-    TSP tsp;
 
 };
 
