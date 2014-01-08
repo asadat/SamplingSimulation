@@ -17,6 +17,7 @@ struct Entity
 {
     Vector<3,double> pos;
     bool start;
+    int nodeIdx;
 };
 
 class TSP: public Visualizer

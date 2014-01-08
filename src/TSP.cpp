@@ -84,7 +84,7 @@ void TSP::create_connected_graph(VertexListGraph &g, WeightMap wmap, std::map<Ve
                     Vector<3> src_center = ( vmap[*src]->pos );
                     Vector<3> dest_center =( vmap[*dest]->pos );
 
-                    weight = (src_center-dest_center)*(src_center-dest_center);
+                    weight = sqrt((src_center-dest_center)*(src_center-dest_center));
                     //printf("%f \n",weight);
                 }
                 else

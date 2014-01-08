@@ -164,6 +164,11 @@ void FeatureTracker::MoveSensorTo(Vector<3,double> pos)
     SetPose(pos);
 }
 
+double FeatureTracker::GetEntropy(TooN::Vector<2, double> tl, TooN::Vector<2, double> br)
+{
+    return mesh.GetEntropy(tl,br);
+}
+
 void FeatureTracker::SetPose(Vector<3, double> newpose)
 {
     pose = newpose;

@@ -1,8 +1,8 @@
 #include "World.h"
 
-#define WORLD_WIDTH     50
-#define WORLD_LENGTH    50
-#define WORLD_MAX_HEIGHT    5
+#define WORLD_WIDTH     100
+#define WORLD_LENGTH    100
+#define WORLD_MAX_HEIGHT    10
 
 World* World::instance = NULL;
 
@@ -19,8 +19,8 @@ World::World():Visualizer()
     // floor
 
 
-    int n = WORLD_WIDTH*WORLD_LENGTH/140;
-    double maxL = 7;
+    int n = WORLD_WIDTH*WORLD_LENGTH/1000;
+    double maxL = 30;
 
     InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);
 

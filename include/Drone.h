@@ -7,6 +7,13 @@
 using namespace TooN;
 using namespace std;
 
+struct PlanNode
+{
+    Vector<3> p;
+    double entropy;
+    vector<PlanNode> children;
+};
+
 class Drone:public Visualizer
 {
 public:
@@ -33,15 +40,17 @@ public:
 private:
 
     void GenerateCoveragePlan(double w_w, double w_l, double flying_height);
+    void OnLevelPlanExecuted();
 
     bool newPlan;
     bool executingPlan;
     int levels;
-
+    double footprint_length;
+    timeval scanStartTime;
 
     //executed path
-    vector< Vector<3, double> > pathWPs;
-    vector< Vector<3, double> > nextPath;
+    vector< PlanNode > pathWPs;
+    vector< PlanNode > nextPath;
 
     vector<Entity*> shortestPath;
     TSP tsp;

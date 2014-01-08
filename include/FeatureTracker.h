@@ -40,6 +40,8 @@ public:
     double GetSamplingLevels(int &level);
     void SetPose(Vector<3, double> newpose);
 
+    double GetEntropy(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
+    double GetMaxEntropy(){return mesh.maxEntropy;}
 private:
 
     double GetMaxHeightInFootprint(double x, double y, double footprint_l);
