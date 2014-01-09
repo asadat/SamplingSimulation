@@ -52,6 +52,9 @@ private:
     vector< PlanNode > pathWPs;
     vector< PlanNode > nextPath;
 
+    vector<Entity*> tspoint;
+
+    Vector<3> homePos;
     vector<Entity*> shortestPath;
     TSP tsp;
 

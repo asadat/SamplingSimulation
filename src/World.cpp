@@ -221,7 +221,7 @@ void World::glDraw()
     glColor3f(0,0,1);
 
     glBegin(GL_LINES);
-    double L = WORLD_WIDTH, l=0.5;
+    double L = WORLD_WIDTH, l= WORLD_WIDTH/20;
     for(int i = 0; i<= L/l; i++)
     {
         double x,y;

@@ -239,7 +239,7 @@ void FeatureTracker::GenerateFeatures(int size, Vector<3, double> viewpoint)
         f.pos[0] = RAND(x1, x2);
         f.pos[1] = RAND(y1, y2);
 
-        f.pos[2] = World::Instance()->GetHeight(f.pos[0], f.pos[1])+RAND(0,0.1)*viewpoint[2];
+        f.pos[2] = World::Instance()->GetHeight(f.pos[0], f.pos[1]);//+RAND(0,0.1)*viewpoint[2];
         f.size = (viewpoint[2] - f.pos[2])*tan(FOV/2)*RAND(0.5, 0.8);
 
         //printf("%f %f %f %f\n", f.pos[0], f.pos[1], f.pos[2], f.size);

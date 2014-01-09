@@ -17,6 +17,7 @@ struct Entity
 {
     Vector<3,double> pos;
     bool start;
+    bool end;
     int nodeIdx;
 };
 
@@ -43,6 +44,7 @@ class TSP: public Visualizer
         ~TSP(){};
         void glDraw(){};
         vector<Entity*> GetShortestPath(vector<Entity* >);
+        vector<Entity*> GetShortestPath_heu(vector<Entity* >);
 
     private:
 

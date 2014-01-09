@@ -1,10 +1,29 @@
 #include "Drone.h"
 #include <sys/time.h>
 
+int MyRand(int n)
+{
+    return std::rand() % n;
+}
+
 Drone::Drone():sensor(makeVector(0,0,3))
 {
     levels = 0;
     executingPlan = false;
+//    for(int i=0; i<25;i++)
+//    {
+//        Entity* en = new Entity();
+//        en->pos = makeVector(pow(-1,i)*10*sin(((double)i)*2*3.14/100.0),pow(-1,i)*10*cos(((double)i)*2*3.14/100.0),5);
+//        en->nodeIdx = i;
+//        en->start = false;
+//        en->end = false;
+//        tspoint.push_back(en);
+//    }
+
+//    tspoint.front()->start=true;
+//    tspoint.back()->end = true;
+//    std::random_shuffle(tspoint.begin(), tspoint.end(),MyRand);
+//    shortestPath = tsp.GetShortestPath_heu(tspoint);
 }
 
 Drone::~Drone()
@@ -14,6 +33,23 @@ Drone::~Drone()
 
 void Drone::glDraw()
 {
+
+    for(int i=0; i<tspoint.size(); i++)
+    {
+       // DrawFrustum(pathWPs[i], pathWPs[i][2]);
+        glColor3f(0,0,1);
+        glPointSize(10);
+        glBegin(GL_POINTS);
+
+        if(tspoint[i]->start)
+            glColor3f(0,1,0);
+        else if(tspoint[i]->end)
+            glColor3f(1,0,0);
+
+        glVertex3f(tspoint[i]->pos[0], tspoint[i]->pos[1], tspoint[i]->pos[2]);
+        glEnd();
+    }
+
     // draw path
     for(int i=0; i<pathWPs.size(); i++)
     {
@@ -37,26 +73,26 @@ void Drone::glDraw()
     }
 
 
-//    for(int i=0; i<shortestPath.size(); i++)
-//    {
-//       // DrawFrustum(pathWPs[i], pathWPs[i][2]);
-//        glColor3f(0,1,0);
-//        glPointSize(10);
-//        glBegin(GL_POINTS);
-//        glVertex3f(shortestPath[i]->pos[0], shortestPath[i]->pos[1], shortestPath[i]->pos[2]);
-//        glEnd();
+    for(int i=0; i<shortestPath.size(); i++)
+    {
+       // DrawFrustum(pathWPs[i], pathWPs[i][2]);
+        glColor3f(0,0,0);
+        glPointSize(10);
+        glBegin(GL_POINTS);
+        glVertex3f(shortestPath[i]->pos[0], shortestPath[i]->pos[1], shortestPath[i]->pos[2]);
+        glEnd();
 
 
-//        if(i+1<shortestPath.size())
-//        {
-//            glColor3f(0.1*((double)i),0,0);
-//            glLineWidth(3);
-//            glBegin(GL_LINES);
-//            glVertex3f(shortestPath[i]->pos[0],shortestPath[i]->pos[1],shortestPath[i]->pos[2]);
-//            glVertex3f(shortestPath[i+1]->pos[0],shortestPath[i+1]->pos[1],shortestPath[i+1]->pos[2]);
-//            glEnd();
-//        }
-//    }
+        if(i+1<shortestPath.size())
+        {
+            glColor3f(0.01*((double)i),0,0);
+            glLineWidth(3);
+            glBegin(GL_LINES);
+            glVertex3f(shortestPath[i]->pos[0],shortestPath[i]->pos[1],shortestPath[i]->pos[2]);
+            glVertex3f(shortestPath[i+1]->pos[0],shortestPath[i+1]->pos[1],shortestPath[i+1]->pos[2]);
+            glEnd();
+        }
+    }
 
 }
 
@@ -168,6 +204,8 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
 
     Vector<3, double> startPoint = makeVector(-w_w/2, -w_l/2, flying_height);
     sensor.SetPose(startPoint+ makeVector(footPrint_l/2,footPrint_l/2,0));
+    homePos = startPoint;
+    homePos[2] = 0;
 
     pathWPs.clear();
     nextPath.clear();
@@ -299,13 +337,16 @@ void Drone::OnLevelPlanExecuted()
         nextPath[i].entropy = sensor.GetEntropy(tl,rb);
     }
 
-    vector<Entity*> tspoint;
+    tspoint.clear();
 
     Entity * en = new Entity();
     en->pos = GetPose();
     en->start = true;
     en->nodeIdx = -1;
     tspoint.push_back(en);
+
+    int tspGoalIdx = 0;
+    double tspGoalDist = 99999999;
 
     for(int i=0; i<nextPath.size();i++)
     {
@@ -316,19 +357,61 @@ void Drone::OnLevelPlanExecuted()
             en->pos = nextPath[i].p;
             en->nodeIdx = i;
             tspoint.push_back(en);
+
+            double dist2Goal = sqrt((homePos-en->pos)*(homePos-en->pos));
+            printf("d:%f\n", dist2Goal);
+            if(dist2Goal<tspGoalDist)
+            {
+                tspGoalIdx = tspoint.size()-1;
+                tspGoalDist = dist2Goal;
+                printf("d:%f i:%d\n", tspGoalDist,tspGoalIdx);
+            }
         }
     }
 
-    //printf("\n");
+    /*printf("start:%f\t%f\t%f\tend:%f\t%f\t%f\n", tspoint[0]->pos[0], tspoint[0]->pos[1], tspoint[0]->pos[2],tspoint[tspGoalIdx]->pos[0],
+           tspoint[tspGoalIdx]->pos[1], tspoint[tspGoalIdx]->pos[2] );
+*/
+    en = new Entity();
+    en->pos = homePos;
+    en->end = true;
+    en->nodeIdx = -2;
+    tspoint.push_back(en);
+
+    //tspoint[tspGoalIdx]->end = true;
+
+    for(int i=0;i<tspoint.size();i++)
+        printf("%d-",tspoint[i]->nodeIdx);
+    printf("\n");
 
     shortestPath.clear();
-    shortestPath = tsp.GetShortestPath(tspoint);
+    shortestPath = tsp.GetShortestPath_heu(tspoint);
 
+    for(int i=0;i<shortestPath.size();i++)
+        printf("%d-",shortestPath[i]->nodeIdx);
+    printf("\n");
+
+  /*  printf("start:%f\t%f\t%f\tend:%f\t%f\t%f\n", shortestPath[0]->pos[0], shortestPath[0]->pos[1], shortestPath[0]->pos[2],
+           shortestPath.back()->pos[0],
+           shortestPath.back()->pos[1], shortestPath.back()->pos[2] );
+*/
     for(int i=0; i<shortestPath.size();i++)
     {
         if(shortestPath[i]->nodeIdx >= 0)
         {
             pathWPs.push_back(nextPath[shortestPath[i]->nodeIdx]);
+        }
+        else if(shortestPath[i]->nodeIdx == -2)
+        {
+            PlanNode pn;
+            pn.p = homePos;
+            pathWPs.push_back(pn);
+        }
+        if(shortestPath[i]->nodeIdx == -1)
+        {
+            PlanNode pn;
+            pn.p = GetPose();
+            pathWPs.push_back(pn);
         }
     }
 

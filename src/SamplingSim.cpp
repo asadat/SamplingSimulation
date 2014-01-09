@@ -71,7 +71,7 @@ void update_event(int ms)
     // - F = Descend constant rate
     // - Right Click = Yaw + Pitch camera variable rate
 
-    double moveRate = (static_cast<double>(ms) / 1000.0) * 5.;
+    double moveRate = (static_cast<double>(ms) / 1000.0) * 20.;
     double angleRate = (static_cast<double>(ms) / 1000.0) * 1.;
     if(Key['w'] || Mouse_Left) // move forward
         translateCamera(moveRate, 0, 0);
@@ -389,7 +389,8 @@ void SamplingSim::mainLoop()
     glEnable(GL_DEPTH_TEST);
     glutIgnoreKeyRepeat(true);
 
-    translateCamera(0, 0, 1);
+    translateCamera(0, 0, 100);
+    rotateCamera(0,-1,0);
 
     // run glut
     glutMainLoop();
