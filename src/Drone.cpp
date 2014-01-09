@@ -72,6 +72,16 @@ void Drone::glDraw()
         }
     }
 
+//    //Draw Next WPs
+//    glColor3f(0,1,0);
+//    glPointSize(10);
+//    glBegin(GL_POINTS);
+//    for(int i=0; i<nextPath.size(); i++)
+//    {
+//        glVertex3f(nextPath[i].p[0], nextPath[i].p[1], nextPath[i].p[2]);
+//    }
+//    glEnd();
+
 
     for(int i=0; i<shortestPath.size(); i++)
     {
@@ -199,7 +209,8 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
 {
     sensor.TurnOnSensing(false);
 
-    double footPrint_l = 2*flying_height*tan(FOV/2);
+    curLevel = 1;
+    double footPrint_l = sensor.GetFootprint(flying_height);
     footprint_length = footPrint_l;
 
     Vector<3, double> startPoint = makeVector(-w_w/2, -w_l/2, flying_height);
@@ -257,6 +268,20 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
             }
 
             PlanNode tmp;
+            int child_n = 4;
+            double next_fp = footPrint_l/child_n;
+            double xx = x-footPrint_l/2.0 + next_fp/2.0;
+            double yy = y-footPrint_l/2.0 + next_fp/2.0;
+
+            double zz = sensor.GetHeightWithGootprint(next_fp);
+
+            for(int i=0; i<child_n; i++)
+                for(int j=0; j<child_n; j++)
+                {
+                    tmp.p = makeVector(xx + i*next_fp, yy + j*next_fp, zz);
+                    nextPath.push_back(tmp);
+                }
+            /*
             tmp.p = makeVector(x+footPrint_l/4,y+footPrint_l/4, flying_height/2);
             nextPath.push_back(tmp);
             tmp.p = makeVector(x+footPrint_l/4,y-footPrint_l/4, flying_height/2);
@@ -264,7 +289,7 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
             tmp.p = makeVector(x-footPrint_l/4,y+footPrint_l/4, flying_height/2);
             nextPath.push_back(tmp);
             tmp.p = makeVector(x-footPrint_l/4,y-footPrint_l/4, flying_height/2);
-            nextPath.push_back(tmp);
+            nextPath.push_back(tmp);*/
         }
 
     }
@@ -275,7 +300,13 @@ void Drone::GoToNextWP(double step_l)
 {
     for(int i=0; i < pathWPs.size(); i++)
     {
-        double wpd = sqrt((pathWPs[i].p-GetPose())*(pathWPs[i].p-GetPose()));
+        PlanNode goalNode = pathWPs[i];
+        double obsHeight = World::Instance()->GetMaxHeightInRect(goalNode.p[0],goalNode.p[1],footprint_length/curLevel);
+        if(goalNode.p[2] - obsHeight < MAX_DIST_TO_OBSTACLES)
+            goalNode.p[2] = obsHeight + MAX_DIST_TO_OBSTACLES;
+
+
+        double wpd = sqrt((goalNode.p-GetPose())*(goalNode.p-GetPose()));
         //for(int j =0; j< floor(wpd/step_l); j++)
         {
             //printf("%f -/n",wpd);
@@ -286,7 +317,7 @@ void Drone::GoToNextWP(double step_l)
             if(wpd > 0.0000001)
             {
                   dxyz = (step_l/wpd);
-                  toWP = pathWPs[i].p-GetPose();
+                  toWP = goalNode.p-GetPose();
             }
 
             MoveSensor(dxyz*toWP);
@@ -305,6 +336,8 @@ void Drone::GoToNextWP(double step_l)
             else
             {
                 pathWPs.erase(pathWPs.begin());
+                //determin next waypoint : consider obstacles
+
             }
         }
 
@@ -329,7 +362,7 @@ void Drone::OnLevelPlanExecuted()
     }
 
     double footprint_l = footprint_length/2;
-
+    curLevel++;
     for(int i=0; i< nextPath.size(); i++)
     {
         Vector<2, double > tl = makeVector(nextPath[i].p[0]-footprint_l/2, nextPath[i].p[1]+footprint_l/2);
@@ -359,12 +392,12 @@ void Drone::OnLevelPlanExecuted()
             tspoint.push_back(en);
 
             double dist2Goal = sqrt((homePos-en->pos)*(homePos-en->pos));
-            printf("d:%f\n", dist2Goal);
+            //printf("d:%f\n", dist2Goal);
             if(dist2Goal<tspGoalDist)
             {
                 tspGoalIdx = tspoint.size()-1;
                 tspGoalDist = dist2Goal;
-                printf("d:%f i:%d\n", tspGoalDist,tspGoalIdx);
+                //printf("d:%f i:%d\n", tspGoalDist,tspGoalIdx);
             }
         }
     }
@@ -374,22 +407,23 @@ void Drone::OnLevelPlanExecuted()
 */
     en = new Entity();
     en->pos = homePos;
+    en->pos[0]=GetPose()[2];
     en->end = true;
     en->nodeIdx = -2;
     tspoint.push_back(en);
 
     //tspoint[tspGoalIdx]->end = true;
 
-    for(int i=0;i<tspoint.size();i++)
-        printf("%d-",tspoint[i]->nodeIdx);
-    printf("\n");
+//    for(int i=0;i<tspoint.size();i++)
+//        printf("%d-",tspoint[i]->nodeIdx);
+//    printf("\n");
 
     shortestPath.clear();
     shortestPath = tsp.GetShortestPath_heu(tspoint);
 
-    for(int i=0;i<shortestPath.size();i++)
-        printf("%d-",shortestPath[i]->nodeIdx);
-    printf("\n");
+//    for(int i=0;i<shortestPath.size();i++)
+//        printf("%d-",shortestPath[i]->nodeIdx);
+//    printf("\n");
 
   /*  printf("start:%f\t%f\t%f\tend:%f\t%f\t%f\n", shortestPath[0]->pos[0], shortestPath[0]->pos[1], shortestPath[0]->pos[2],
            shortestPath.back()->pos[0],
@@ -415,6 +449,8 @@ void Drone::OnLevelPlanExecuted()
         }
     }
 
+    tspoint.clear();
+    shortestPath.clear();
     nextPath.clear();
 
 }

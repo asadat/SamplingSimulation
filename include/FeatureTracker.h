@@ -42,9 +42,11 @@ public:
 
     double GetEntropy(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
     double GetMaxEntropy(){return mesh.maxEntropy;}
+    double GetFootprint(double sensorHight);
+    double GetHeightWithGootprint(double footprint_l);
+
 private:
 
-    double GetMaxHeightInFootprint(double x, double y, double footprint_l);
     void GenerateFeatures(int size, Vector<3, double> viewpoint);
     std::vector<Feature> TrackFeatures(TooN::Vector<3, double> viewpoint);
     void UpdateMatchedFeatures();
@@ -58,7 +60,7 @@ private:
 
     bool bSensing;
     MeshCreator mesh;
-    double footprint_length;
+    //double footprint_length;
     bool bDrawEntropy;
 
     vector<double> entropies;

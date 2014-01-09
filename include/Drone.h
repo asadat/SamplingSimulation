@@ -4,6 +4,8 @@
 #include "World.h"
 #include "TSP.h"
 
+#define     MAX_DIST_TO_OBSTACLES   5
+
 using namespace TooN;
 using namespace std;
 
@@ -46,6 +48,7 @@ private:
     bool executingPlan;
     int levels;
     double footprint_length;
+    int curLevel;
     timeval scanStartTime;
 
     //executed path

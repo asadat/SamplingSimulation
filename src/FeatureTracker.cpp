@@ -169,6 +169,16 @@ double FeatureTracker::GetEntropy(TooN::Vector<2, double> tl, TooN::Vector<2, do
     return mesh.GetEntropy(tl,br);
 }
 
+double FeatureTracker::GetFootprint(double sensorHight)
+{
+    return 2*tan(FOV/2)*sensorHight;
+}
+
+double FeatureTracker::GetHeightWithGootprint(double footprint_l)
+{
+    return 0.5*footprint_l/tan(FOV/2);
+}
+
 void FeatureTracker::SetPose(Vector<3, double> newpose)
 {
     pose = newpose;
@@ -277,18 +287,6 @@ std::vector<Feature> FeatureTracker::TrackFeatures(Vector<3, double> viewpoint)
     }
 
     return result;
-}
-
-double FeatureTracker::GetMaxHeightInFootprint(double x, double y, double footprint_l)
-{
-    double mxheight=0;
-    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=0.2)
-        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=0.2)
-        {
-            double h = World::Instance()->GetHeight(i,j);
-            mxheight = (mxheight < h)?h:mxheight;
-        }
-    return mxheight;
 }
 
 void FeatureTracker::OnPlanExecuted()

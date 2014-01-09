@@ -19,7 +19,7 @@ World::World():Visualizer()
     // floor
 
 
-    int n = WORLD_WIDTH*WORLD_LENGTH/1000;
+    int n = WORLD_WIDTH*WORLD_LENGTH/2000;
     double maxL = 30;
 
     InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);
@@ -291,6 +291,18 @@ void World::ToggleDraw()
         bDraw = false;
         bDrawGhost = false;
     }
+}
+
+double World::GetMaxHeightInRect(double x, double y, double footprint_l)
+{
+    double mxheight=0;
+    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=0.2)
+        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=0.2)
+        {
+            double h = GetHeight(i,j);
+            mxheight = (mxheight < h)?h:mxheight;
+        }
+    return mxheight;
 }
 
 double World::GetMaxHeight()

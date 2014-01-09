@@ -1,6 +1,49 @@
 #include "TSP.h"
 #include <stdio.h>
 
+double d(Vector<3> a, Vector<3> b)
+{
+    return sqrt((a-b)*(a-b));
+}
+
+void TSP::Sort(vector<Entity *> &list, Vector<3> s)
+{
+
+    vector<Entity *> sortedlist;
+
+
+    while(!list.empty())
+    {
+        Entity* node = list.back();
+        list.pop_back();
+
+        if(sortedlist.empty())
+        {
+            sortedlist.push_back(node);
+            continue;
+        }
+
+        bool flag = false;
+        for(int i=0;i<sortedlist.size();i++)
+        {
+            if(d(node->pos,s)>d(sortedlist[i]->pos,s))
+            {
+                sortedlist.insert(sortedlist.begin()+i,node);
+                flag = true;
+                break;
+            }
+
+        }
+
+        if(!flag)
+            sortedlist.push_back(node);
+    }
+
+    printf("size: %d\n", sortedlist.size());
+    std::copy(sortedlist.begin(), sortedlist.end(), std::back_inserter(list));
+    printf("size: %d\n", list.size());
+
+}
 
 vector<Entity* > TSP::GetShortestPath_heu(vector<Entity* > to_visit)
 {
@@ -25,6 +68,7 @@ vector<Entity* > TSP::GetShortestPath_heu(vector<Entity* > to_visit)
         }
     }
 
+    Sort(to_visit,result[1]->pos);
     while(!to_visit.empty())
     {
         Entity * en = to_visit.back();

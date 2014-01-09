@@ -55,6 +55,7 @@ public:
     double GetWidth();
     double GetLength();
     double GetMaxHeight();
+    double GetMaxHeightInRect(double x, double y, double footprint_l);
 
 private:
 
