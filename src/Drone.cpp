@@ -8,6 +8,7 @@ int MyRand(int n)
 
 Drone::Drone():sensor(makeVector(0,0,3))
 {
+    speed = 20;
     levels = 0;
     executingPlan = false;
 //    for(int i=0; i<25;i++)
@@ -72,15 +73,15 @@ void Drone::glDraw()
         }
     }
 
-//    //Draw Next WPs
-//    glColor3f(0,1,0);
-//    glPointSize(10);
-//    glBegin(GL_POINTS);
-//    for(int i=0; i<nextPath.size(); i++)
-//    {
-//        glVertex3f(nextPath[i].p[0], nextPath[i].p[1], nextPath[i].p[2]);
-//    }
-//    glEnd();
+    //Draw Next WPs
+    glColor3f(0,1,0);
+    glPointSize(10);
+    glBegin(GL_POINTS);
+    for(int i=0; i<nextPath.size(); i++)
+    {
+        glVertex3f(nextPath[i].p[0], nextPath[i].p[1], nextPath[i].p[2]);
+    }
+    glEnd();
 
 
     for(int i=0; i<shortestPath.size(); i++)
@@ -134,7 +135,7 @@ void Drone::Update()
         elapsedTime = (-last_time.tv_sec + seconds.tv_sec) * 1000.0;      // sec to ms
         elapsedTime += (-last_time.tv_usec + seconds.tv_usec) / 1000.0;   // us to ms
 
-        GoToNextWP(20.0*(elapsedTime/1000.0));
+        GoToNextWP(speed*(elapsedTime/1000.0));
 
         last_time = seconds;
 
@@ -151,9 +152,9 @@ Vector<3> Drone::GetPose()
     return sensor.GetSensorPose();
 }
 
-void Drone::ToggleDrawEntropy()
+void Drone::ToggleDrawInterestingness()
 {
-    sensor.ToggleDrawEntropyField();
+    sensor.ToggleDrawInterestingnessField();
 }
 
 void Drone::ToggleStealthMode()
@@ -234,53 +235,55 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
             double y = startPoint[1] + footPrint_l/2 + ((double)j)*footPrint_l;
 
             double scanHeight = flying_height;//+GetMaxHeightInFootprint(x,y,footPrint_l);//World::Instance()->GetHeight(x,y);
-            if(false && !pathWPs.empty())
-            {
-                PlanNode pn;
-                Vector<3,double>  prevWP = (pathWPs.back().p);
-                if(fabs(scanHeight-prevWP[2])<0.001)
-                {
-                    pn.p = makeVector(x,y, scanHeight);
-                    pathWPs.push_back(pn);
-                }
-                else if(prevWP[2] < scanHeight)
-                {
-                    pn.p = makeVector(prevWP[0],prevWP[1], scanHeight);
-                    pathWPs.push_back(pn);
+//            if(false && !pathWPs.empty())
+//            {
+//                PlanNode pn;
+//                pn.expandable = true;
+//                Vector<3,double>  prevWP = (pathWPs.back().p);
+//                if(fabs(scanHeight-prevWP[2])<0.001)
+//                {
+//                    pn.p = makeVector(x,y, scanHeight);
+//                    pathWPs.push_back(pn);
+//                }
+//                else if(prevWP[2] < scanHeight)
+//                {
+//                    pn.p = makeVector(prevWP[0],prevWP[1], scanHeight);
+//                    pathWPs.push_back(pn);
 
-                    pn.p = makeVector(x,y, scanHeight);
-                    pathWPs.push_back(pn);
-                }
-                else
-                {
-                    pn.p = makeVector(x,y, prevWP[2]);
-                    pathWPs.push_back(pn);
+//                    pn.p = makeVector(x,y, scanHeight);
+//                    pathWPs.push_back(pn);
+//                }
+//                else
+//                {
+//                    pn.p = makeVector(x,y, prevWP[2]);
+//                    pathWPs.push_back(pn);
 
-                    pn.p = makeVector(x,y, scanHeight);
-                    pathWPs.push_back(pn);
-                }
-            }
-            else
+//                    pn.p = makeVector(x,y, scanHeight);
+//                    pathWPs.push_back(pn);
+//                }
+//            }
+//            else
             {
                 PlanNode pn;
                 pn.p = makeVector(x,y, scanHeight);
+                SetExpandable(pn);
                 pathWPs.push_back(pn);
             }
 
-            PlanNode tmp;
-            int child_n = 4;
-            double next_fp = footPrint_l/child_n;
-            double xx = x-footPrint_l/2.0 + next_fp/2.0;
-            double yy = y-footPrint_l/2.0 + next_fp/2.0;
+//            PlanNode tmp;
+//            int child_n = 3;
+//            double next_fp = footPrint_l/child_n;
+//            double xx = x-footPrint_l/2.0 + next_fp/2.0;
+//            double yy = y-footPrint_l/2.0 + next_fp/2.0;
 
-            double zz = sensor.GetHeightWithGootprint(next_fp);
+//            double zz = sensor.GetHeightWithGootprint(next_fp);
 
-            for(int i=0; i<child_n; i++)
-                for(int j=0; j<child_n; j++)
-                {
-                    tmp.p = makeVector(xx + i*next_fp, yy + j*next_fp, zz);
-                    nextPath.push_back(tmp);
-                }
+//            for(int i=0; i<child_n; i++)
+//                for(int j=0; j<child_n; j++)
+//                {
+//                    tmp.p = makeVector(xx + i*next_fp, yy + j*next_fp, zz);
+//                    nextPath.push_back(tmp);
+//                }
             /*
             tmp.p = makeVector(x+footPrint_l/4,y+footPrint_l/4, flying_height/2);
             nextPath.push_back(tmp);
@@ -294,6 +297,17 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
 
     }
 
+    PlanNode pn;
+    pn.expandable = false;
+    pn.p = startPoint;
+    pathWPs.push_back(pn);
+
+
+}
+
+void Drone::ChangeSpeed(double ds)
+{
+    speed = (speed+ds > 0)? speed+ds : speed;
 }
 
 void Drone::GoToNextWP(double step_l)
@@ -325,17 +339,21 @@ void Drone::GoToNextWP(double step_l)
 
        // MoveSensorTo(pathWPs[i+1]);
 
-        if(wpd < step_l)
+        if(wpd < step_l || (pathWPs.size()<=1 && !nextPath.empty()))
         {
             if(pathWPs.size() == 1)
             {
+                VisitWaypoint(pathWPs.front());
+
                 //printf("level cleared.\n");
                 pathWPs.clear();
                 OnLevelPlanExecuted();
             }
             else
             {
+                VisitWaypoint(pathWPs.front());
                 pathWPs.erase(pathWPs.begin());
+
                 //determin next waypoint : consider obstacles
 
             }
@@ -343,6 +361,42 @@ void Drone::GoToNextWP(double step_l)
 
         break;
     }
+}
+
+bool Drone::SetExpandable(PlanNode &pn)
+{
+    if(pn.p[2] - World::Instance()->GetMaxHeightInRect(pn.p[0], pn.p[1], sensor.GetFootprint(pn.p[2])) > 2 * MAX_DIST_TO_OBSTACLES)
+    {
+        pn.expandable = true;
+    }
+}
+
+void Drone::VisitWaypoint(PlanNode node)
+{
+    if(!node.expandable)
+        return;
+
+    PlanNode tmp;
+    int child_n = 4;
+    double footPrint_l = sensor.GetFootprint(node.p[2]);
+    double next_fp = footPrint_l/child_n;
+    double xx = node.p[0]-footPrint_l/2.0 + next_fp/2.0;
+    double yy = node.p[1]-footPrint_l/2.0 + next_fp/2.0;
+    double zz = sensor.GetHeightWithGootprint(next_fp);
+
+  //  printf("1\n");
+    for(int i=0; i<child_n; i++)
+        for(int j=0; j<child_n; j++)
+        {
+            tmp.p = makeVector(xx + i*next_fp, yy + j*next_fp, zz);
+//            if(tmp.p[2] - World::Instance()->GetMaxHeightInRect(tmp.p[0], tmp.p[1], next_fp) > 2*MAX_DIST_TO_OBSTACLES)
+//            {
+//                tmp.expandable = true;
+//            }
+            SetExpandable(tmp);
+            nextPath.push_back(tmp);
+            //pathWPs.insert(pathWPs.begin()+1,tmp);
+        }
 }
 
 void Drone::OnLevelPlanExecuted()
@@ -367,7 +421,7 @@ void Drone::OnLevelPlanExecuted()
     {
         Vector<2, double > tl = makeVector(nextPath[i].p[0]-footprint_l/2, nextPath[i].p[1]+footprint_l/2);
         Vector<2, double > rb = makeVector(nextPath[i].p[0]+footprint_l/2, nextPath[i].p[1]-footprint_l/2);
-        nextPath[i].entropy = sensor.GetEntropy(tl,rb);
+        nextPath[i].interestingness = sensor.GetInterestingness(tl,rb);
     }
 
     tspoint.clear();
@@ -383,7 +437,7 @@ void Drone::OnLevelPlanExecuted()
 
     for(int i=0; i<nextPath.size();i++)
     {
-        if(nextPath[i].entropy/sensor.GetMaxEntropy() > 0.2)
+        if(nextPath[i].interestingness/sensor.GetMaxInterestingness() > /*curLevel**/0.2)
         {
             //printf("%f ",nextPath[i].entropy/sensor.GetMaxEntropy());
             en = new Entity();

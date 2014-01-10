@@ -266,6 +266,21 @@ void SamplingSim::hanldeKeyPressed(std::map<unsigned char, bool> &key, bool &upd
 {
     updateKey = true;
 
+    if(key['`'])
+    {
+        world->PopulateWorld();
+    }
+
+    if(key[']'])
+    {
+        drone.ChangeSpeed(2);
+    }
+
+    if(key['['])
+    {
+        drone.ChangeSpeed(-2);
+    }
+
     if(key['u'])
     {
         //SamplingSim::Instance()->drone.sensor
@@ -315,7 +330,7 @@ void SamplingSim::hanldeKeyPressed(std::map<unsigned char, bool> &key, bool &upd
 
     if(key['3'])
     {
-        drone.ToggleDrawEntropy();
+        drone.ToggleDrawInterestingness();
         //drone.sensor.ToggleDrawEntropyField();
         updateKey = false;
     }
@@ -389,8 +404,8 @@ void SamplingSim::mainLoop()
     glEnable(GL_DEPTH_TEST);
     glutIgnoreKeyRepeat(true);
 
-    translateCamera(0, 0, 100);
-    rotateCamera(0,-1,0);
+    translateCamera(-70, 0, 70);
+    rotateCamera(0,-0.8,0);
 
     // run glut
     glutMainLoop();

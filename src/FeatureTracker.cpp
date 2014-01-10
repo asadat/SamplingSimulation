@@ -164,9 +164,9 @@ void FeatureTracker::MoveSensorTo(Vector<3,double> pos)
     SetPose(pos);
 }
 
-double FeatureTracker::GetEntropy(TooN::Vector<2, double> tl, TooN::Vector<2, double> br)
+double FeatureTracker::GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br)
 {
-    return mesh.GetEntropy(tl,br);
+    return mesh.GetInterestingness(tl,br);
 }
 
 double FeatureTracker::GetFootprint(double sensorHight)

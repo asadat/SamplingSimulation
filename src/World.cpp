@@ -1,8 +1,8 @@
 #include "World.h"
 
-#define WORLD_WIDTH     100
-#define WORLD_LENGTH    100
-#define WORLD_MAX_HEIGHT    10
+#define WORLD_WIDTH     150
+#define WORLD_LENGTH    150
+#define WORLD_MAX_HEIGHT    15
 
 World* World::instance = NULL;
 
@@ -10,6 +10,13 @@ World::World():Visualizer()
 {
     //RegisterGlDrawing();
 
+   PopulateWorld();
+
+}
+
+void World::PopulateWorld()
+{
+    planes.clear();
     bDraw = true;
 
     srand(time(NULL));
@@ -28,11 +35,11 @@ World::World():Visualizer()
     {
         double x,y,z;
         double lx,ly;
-        lx = RAND(1, maxL/2);
-        ly = RAND(1, maxL/2);
+        lx = RAND(0.2* maxL, 0.5* maxL);
+        ly = RAND(0.2* maxL, 0.5* maxL);
         x = RAND((-worldW/2+lx),(worldW/2-lx));
         y = RAND((-worldL/2+ly),(worldL/2-ly));
-        z = RAND(1, WORLD_MAX_HEIGHT);
+        z = RAND(0.5, 1) * WORLD_MAX_HEIGHT;
 
         InsertPlane(x-lx, y+ly, z, x+lx, y-ly, z);
     }

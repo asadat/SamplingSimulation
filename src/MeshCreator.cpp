@@ -18,7 +18,7 @@ void MeshCreator::AddVertex(TooN::Vector<3,double> v)
 void MeshCreator::CleanMesh()
 {
     mesh.clear();
-    maxEntropy = 0.001;
+    maxInterestingness = 0.001;
 }
 
 void MeshCreator::glDraw()
@@ -44,7 +44,7 @@ void MeshCreator::glDraw()
     glEnd();
 
     //Fill
-    double hR = 10;
+    double hR = 30;
     glColor3f(0.8,0.6,1);
     glLineWidth(2);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -62,8 +62,8 @@ void MeshCreator::glDraw()
         dz[2] = fabs(p[2].z() - p[1].z());
         double cc = dz[0]+dz[1]+dz[2];
 
-        //glColor3f(1-(p[0].z()+p[1].z()+p[2].z())/hR,1-(p[0].z()+p[1].z()+p[2].z())/hR,0.8);
-        glColor3f(1-cc/hR,1-cc/hR,0.8);
+        glColor3f(1-(p[0].z()+p[1].z()+p[2].z())/hR,1-(p[0].z()+p[1].z()+p[2].z())/hR,0.8);
+        //glColor3f(1-cc/hR,1-cc/hR,0.8);
 
         glVertex3f(p[0].x(), p[0].y(), p[0].z());
         glVertex3f(p[1].x(), p[1].y(), p[1].z());
@@ -72,7 +72,7 @@ void MeshCreator::glDraw()
     glEnd();
 }
 
-double MeshCreator::GetEntropy(Vector<2, double> tl, Vector<2, double> br)
+double MeshCreator::GetInterestingness(Vector<2, double> tl, Vector<2, double> br)
 {
     double entropy = 0;
     Delaunay::Finite_faces_iterator fit;
@@ -102,7 +102,7 @@ double MeshCreator::GetEntropy(Vector<2, double> tl, Vector<2, double> br)
         }
     }
 
-    maxEntropy = (maxEntropy>entropy)?maxEntropy:entropy;
+    maxInterestingness = (maxInterestingness>entropy)?maxInterestingness:entropy;
    // printf("MAX: %f\n",max);
     return entropy;
 }

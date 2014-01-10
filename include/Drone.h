@@ -12,8 +12,9 @@ using namespace std;
 struct PlanNode
 {
     Vector<3> p;
-    double entropy;
+    double interestingness;
     vector<PlanNode> children;
+    bool expandable;
 };
 
 class Drone:public Visualizer
@@ -30,19 +31,23 @@ public:
     void GoLevelDown();
     void GoLevelUp();
     void ToggleStealthMode();
-    void ToggleDrawEntropy();
+    void ToggleDrawInterestingness();
 
     void GeneratePlan();
     void ExecutePlan();
     void DestroyPlan();
 
     void GoToNextWP(double step_l);
+    void ChangeSpeed(double ds);
 
-    FeatureTracker sensor;
 private:
 
+    bool SetExpandable(PlanNode &pn);
+    void VisitWaypoint(PlanNode node);
     void GenerateCoveragePlan(double w_w, double w_l, double flying_height);
     void OnLevelPlanExecuted();
+
+    FeatureTracker sensor;
 
     bool newPlan;
     bool executingPlan;
@@ -51,6 +56,7 @@ private:
     int curLevel;
     timeval scanStartTime;
 
+    double speed;
     //executed path
     vector< PlanNode > pathWPs;
     vector< PlanNode > nextPath;

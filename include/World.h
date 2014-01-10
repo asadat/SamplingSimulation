@@ -6,7 +6,7 @@
 #include "TooN/TooN.h"
 #include <vector>
 
-#define RAND(a,b)    (a)+((b)-(a))*((double)(rand()%1000))/1000
+#define RAND(a,b)    ((a)+((b)-(a))*((double)(rand()%1000))/1000)
 
 
 using namespace TooN;
@@ -51,7 +51,7 @@ public:
     double GetHeight(double x, double y);
     void InsertPlane(double x1, double y1, double z1, double x2, double y2, double z2);
     void ToggleDraw();
-
+    void PopulateWorld();
     double GetWidth();
     double GetLength();
     double GetMaxHeight();

@@ -31,7 +31,7 @@ public:
     void MoveSensor(TooN::Vector<3,double> dPos);
     void MoveSensorTo(TooN::Vector<3,double> pos);
 
-    void ToggleDrawEntropyField(){bDrawEntropy = !bDrawEntropy;}
+    void ToggleDrawInterestingnessField(){bDrawInterestingness = !bDrawInterestingness;}
     void ToggleSensing(){ bSensing =! bSensing;}
     void TurnOnSensing(bool on){bSensing = on;}
     void ClearHistory();
@@ -40,8 +40,8 @@ public:
     double GetSamplingLevels(int &level);
     void SetPose(Vector<3, double> newpose);
 
-    double GetEntropy(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
-    double GetMaxEntropy(){return mesh.maxEntropy;}
+    double GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
+    double GetMaxInterestingness(){return mesh.maxInterestingness;}
     double GetFootprint(double sensorHight);
     double GetHeightWithGootprint(double footprint_l);
 
@@ -61,7 +61,7 @@ private:
     bool bSensing;
     MeshCreator mesh;
     //double footprint_length;
-    bool bDrawEntropy;
+    bool bDrawInterestingness;
 
     vector<double> entropies;
 
