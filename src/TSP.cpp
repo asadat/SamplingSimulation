@@ -39,9 +39,9 @@ void TSP::Sort(vector<Entity *> &list, Vector<3> s)
             sortedlist.push_back(node);
     }
 
-    printf("size: %d\n", sortedlist.size());
+    //printf("size: %d\n", sortedlist.size());
     std::copy(sortedlist.begin(), sortedlist.end(), std::back_inserter(list));
-    printf("size: %d\n", list.size());
+    //printf("size: %d\n", list.size());
 
 }
 

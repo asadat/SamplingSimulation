@@ -4,7 +4,7 @@
 #include "World.h"
 #include "TSP.h"
 
-#define     MAX_DIST_TO_OBSTACLES   5
+#define     MAX_DIST_TO_OBSTACLES   10
 
 using namespace TooN;
 using namespace std;

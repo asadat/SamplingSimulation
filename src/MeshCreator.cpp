@@ -18,7 +18,12 @@ void MeshCreator::AddVertex(TooN::Vector<3,double> v)
 void MeshCreator::CleanMesh()
 {
     mesh.clear();
-    maxInterestingness = 0.001;
+    ResetMaxInterestingness();
+}
+
+void MeshCreator::ResetMaxInterestingness()
+{
+    maxInterestingness = 0.01;
 }
 
 void MeshCreator::glDraw()

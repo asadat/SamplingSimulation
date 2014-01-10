@@ -212,7 +212,8 @@ double FeatureTracker::GetSamplingLevels(int &level)
     double dv=1;
     for(int i=0;i<level-1; i++)
     {
-        dv*=2;
+        //dv*=2;
+        dv += 1;
     }
     double result = (0.5*max_l/dv)*tan(FOV/2);
     if(result < 0.1/*World::Instance()->GetMaxHeight()*/)
@@ -250,7 +251,7 @@ void FeatureTracker::GenerateFeatures(int size, Vector<3, double> viewpoint)
         f.pos[1] = RAND(y1, y2);
 
         f.pos[2] = World::Instance()->GetHeight(f.pos[0], f.pos[1]);//+RAND(0,0.1)*viewpoint[2];
-        f.size = (viewpoint[2] - f.pos[2])*tan(FOV/2)*RAND(0.5, 0.8);
+        f.size = (viewpoint[2] - f.pos[2])*tan(FOV/2)*RAND(0.2, 0.6);
 
         //printf("%f %f %f %f\n", f.pos[0], f.pos[1], f.pos[2], f.size);
 

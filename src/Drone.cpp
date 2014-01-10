@@ -315,7 +315,7 @@ void Drone::GoToNextWP(double step_l)
     for(int i=0; i < pathWPs.size(); i++)
     {
         PlanNode goalNode = pathWPs[i];
-        double obsHeight = World::Instance()->GetMaxHeightInRect(goalNode.p[0],goalNode.p[1],footprint_length/curLevel);
+        double obsHeight = World::Instance()->GetMaxHeightInRect(goalNode.p[0],goalNode.p[1],sensor.GetFootprint(goalNode.p[2]));
         if(goalNode.p[2] - obsHeight < MAX_DIST_TO_OBSTACLES)
             goalNode.p[2] = obsHeight + MAX_DIST_TO_OBSTACLES;
 
@@ -365,7 +365,7 @@ void Drone::GoToNextWP(double step_l)
 
 bool Drone::SetExpandable(PlanNode &pn)
 {
-    if(pn.p[2] - World::Instance()->GetMaxHeightInRect(pn.p[0], pn.p[1], sensor.GetFootprint(pn.p[2])) > 2 * MAX_DIST_TO_OBSTACLES)
+    if(pn.p[2] - World::Instance()->GetMaxHeightInRect(pn.p[0], pn.p[1], sensor.GetFootprint(pn.p[2])) >  MAX_DIST_TO_OBSTACLES)
     {
         pn.expandable = true;
     }
@@ -377,7 +377,7 @@ void Drone::VisitWaypoint(PlanNode node)
         return;
 
     PlanNode tmp;
-    int child_n = 4;
+    int child_n = 6;
     double footPrint_l = sensor.GetFootprint(node.p[2]);
     double next_fp = footPrint_l/child_n;
     double xx = node.p[0]-footPrint_l/2.0 + next_fp/2.0;
@@ -415,10 +415,12 @@ void Drone::OnLevelPlanExecuted()
         return;
     }
 
-    double footprint_l = footprint_length/2;
+
+    sensor.ResetInterestingness();
     curLevel++;
     for(int i=0; i< nextPath.size(); i++)
     {
+        double footprint_l = sensor.GetFootprint(nextPath[i].p[2]);
         Vector<2, double > tl = makeVector(nextPath[i].p[0]-footprint_l/2, nextPath[i].p[1]+footprint_l/2);
         Vector<2, double > rb = makeVector(nextPath[i].p[0]+footprint_l/2, nextPath[i].p[1]-footprint_l/2);
         nextPath[i].interestingness = sensor.GetInterestingness(tl,rb);
@@ -437,7 +439,8 @@ void Drone::OnLevelPlanExecuted()
 
     for(int i=0; i<nextPath.size();i++)
     {
-        if(nextPath[i].interestingness/sensor.GetMaxInterestingness() > /*curLevel**/0.2)
+        //printf("%f ", nextPath[i].interestingness/sensor.GetMaxInterestingness());
+        if(nextPath[i].interestingness/sensor.GetMaxInterestingness() > /*(curLevel-1)**/0.2)
         {
             //printf("%f ",nextPath[i].entropy/sensor.GetMaxEntropy());
             en = new Entity();
@@ -507,4 +510,5 @@ void Drone::OnLevelPlanExecuted()
     shortestPath.clear();
     nextPath.clear();
 
+    printf("#POI: %d\n",pathWPs.size());
 }

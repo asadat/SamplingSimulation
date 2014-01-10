@@ -23,6 +23,7 @@ public:
     void glDraw();
 
     double GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
+    void ResetMaxInterestingness();
 
     double maxInterestingness;
 private:
