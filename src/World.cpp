@@ -26,7 +26,7 @@ void World::PopulateWorld()
     // floor
 
 
-    int n = WORLD_WIDTH*WORLD_LENGTH/2000;
+    int n = WORLD_WIDTH*WORLD_LENGTH/5000;
     double maxL = 30;
 
     InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);

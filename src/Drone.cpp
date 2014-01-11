@@ -339,6 +339,11 @@ void Drone::GoToNextWP(double step_l)
 
        // MoveSensorTo(pathWPs[i+1]);
 
+        if(pathWPs.size()==1 && nextPath.empty())
+        {
+            sensor.TurnOnSensing(false);
+        }
+
         if(wpd < step_l || (pathWPs.size()<=1 && !nextPath.empty()))
         {
             if(pathWPs.size() == 1)
@@ -377,7 +382,7 @@ void Drone::VisitWaypoint(PlanNode node)
         return;
 
     PlanNode tmp;
-    int child_n = 6;
+    int child_n = 4;
     double footPrint_l = sensor.GetFootprint(node.p[2]);
     double next_fp = footPrint_l/child_n;
     double xx = node.p[0]-footPrint_l/2.0 + next_fp/2.0;
@@ -464,10 +469,10 @@ void Drone::OnLevelPlanExecuted()
 */
     en = new Entity();
     en->pos = homePos;
-    en->pos[0]=GetPose()[2];
+    en->pos[0]=tspoint.back()->pos[2];
     en->end = true;
     en->nodeIdx = -2;
-    tspoint.push_back(en);
+    //tspoint.push_back(en);
 
     //tspoint[tspGoalIdx]->end = true;
 
@@ -476,7 +481,9 @@ void Drone::OnLevelPlanExecuted()
 //    printf("\n");
 
     shortestPath.clear();
-    shortestPath = tsp.GetShortestPath_heu(tspoint);
+    //shortestPath = tsp.GetShortestPath_heu(tspoint);
+    shortestPath = tsp.GetShortestPath(tspoint);
+    shortestPath.push_back(en);
 
 //    for(int i=0;i<shortestPath.size();i++)
 //        printf("%d-",shortestPath[i]->nodeIdx);

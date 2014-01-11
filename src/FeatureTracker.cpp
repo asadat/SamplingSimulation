@@ -4,7 +4,7 @@
 #include <stdio.h>
 //#define RAND(a,b)    a+((double)(b-a))*((double)(rand()%1000))/1000
 //#define RAND(a,b)    (a)+((b)-(a))*((double)(rand()%1000))/1000
-#define MIN_FEATURES    50
+#define MIN_FEATURES    30
 #define MAX(a,b)    (a>b)?a:b
 
 
@@ -93,6 +93,29 @@ void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
 
 void FeatureTracker::glDraw()
 {
+//    static int lastt = 0;
+//    static int idx=0;
+//    lastt++;
+//    if(lastt > 100)
+//    {
+//        lastt = 0;
+//        idx = RAND(0,features.size()-1);
+//    }
+
+//    if(idx >0 && idx < features.size())
+//    {
+//        glLineWidth(5);
+//        glColor3f(1,0,0);
+//        glBegin(GL_LINES);
+//        glVertex3f(features[idx].view[0]-features[idx].size,features[idx].view[1],features[idx].view[2]);
+//        glVertex3f(features[idx].view[0]+features[idx].size,features[idx].view[1],features[idx].view[2]);
+//        glEnd();
+
+//        glBegin(GL_POINTS);
+//        glVertex3f(features[idx].pos[0],features[idx].pos[1],features[idx].pos[2]);
+//        glEnd();
+//    }
+
     DrawFrustum(pose, pose[2]);
 
     //std::vector<Feature> fs = MatchedFeatures(pose);
@@ -188,6 +211,8 @@ void FeatureTracker::SetPose(Vector<3, double> newpose)
         vector<Feature> fs = TrackFeatures(pose);
 
         double rndMin = MIN_FEATURES * RAND(0.7,1.3);
+        //printf("%d\n",fs.size());
+
         if(fs.size() < rndMin)
         {
             GenerateFeatures(rndMin - fs.size(), pose);
@@ -251,7 +276,7 @@ void FeatureTracker::GenerateFeatures(int size, Vector<3, double> viewpoint)
         f.pos[1] = RAND(y1, y2);
 
         f.pos[2] = World::Instance()->GetHeight(f.pos[0], f.pos[1]);//+RAND(0,0.1)*viewpoint[2];
-        f.size = (viewpoint[2] - f.pos[2])*tan(FOV/2)*RAND(0.2, 0.6);
+        f.size = (viewpoint[2] - f.pos[2])*tan(FOV/2)*RAND(0.5, 0.8);
 
         //printf("%f %f %f %f\n", f.pos[0], f.pos[1], f.pos[2], f.size);
 
@@ -279,8 +304,13 @@ std::vector<Feature> FeatureTracker::TrackFeatures(Vector<3, double> viewpoint)
     {
         if(InsideFOV(features[i], viewpoint))
         {
-            double dist = sqrt((viewpoint-features[i].view)*(viewpoint-features[i].view));
-            if(dist < features[i].size)
+
+            Vector<3> prj2d = viewpoint-features[i].view;
+            double dz = fabs(prj2d[2]);
+            prj2d[2] = 0;
+
+            double dist2d = sqrt(prj2d*prj2d);
+            if(dist2d < features[i].size && dz < 2)
             {
                 result.push_back(features[i]);
             }

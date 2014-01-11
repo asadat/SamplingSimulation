@@ -98,7 +98,7 @@ vector<Entity* > TSP::GetShortestPath(vector<Entity* > to_visit)
 
     std::vector< Entity* > ent_in_order;
     vector<Vertex> shortest_path_vect;
-    VertexListGraph g( to_visit.size() + 1 ); //plus one dummy node
+    VertexListGraph g( to_visit.size());
     WeightMap weight_map(get(edge_weight, g));
 
     //populate map from vertices to Triangle3D structs
@@ -111,11 +111,11 @@ vector<Entity* > TSP::GetShortestPath(vector<Entity* > to_visit)
     metric_tsp_approx_tour(g, back_inserter(shortest_path_vect));
 
     //make sure the shortext path starts and ends on the dummy vertex
-    assert( verts_to_ent.find(shortest_path_vect[0])==verts_to_ent.end() );
-    assert( verts_to_ent.find(shortest_path_vect[shortest_path_vect.size()-1])==verts_to_ent.end() );//assumes size>0
+   // assert( verts_to_ent.find(shortest_path_vect[0])==verts_to_ent.end() );
+   // assert( verts_to_ent.find(shortest_path_vect[shortest_path_vect.size()-1])==verts_to_ent.end() );//assumes size>0
 
     //begin()+1 excludes the first vertex and end()-1 excludes the last, since they're both the dummy vertex
-    for (vector<Vertex>::iterator itr = shortest_path_vect.begin()+1; itr != shortest_path_vect.end()-1; ++itr)
+    for (vector<Vertex>::iterator itr = shortest_path_vect.begin(); itr != shortest_path_vect.end()-1; ++itr)
     {
         ent_in_order.push_back( verts_to_ent[*itr] );
     }
@@ -131,7 +131,7 @@ map<TSP::Vertex, Entity*> TSP::map_vertices_to_entities(vector<Entity*> entities
     std::map<Vertex, Entity*> v_pmap;
 
     VItr vi, ve;
-    int idx(-1);
+    int idx(0);
     for (boost::tie(vi, ve) = vertices(g); vi != ve; ++vi)
     {
         Vertex v(*vi);
@@ -201,10 +201,10 @@ void TSP::create_connected_graph(VertexListGraph &g, WeightMap wmap, std::map<Ve
                 boost::tie(e, inserted) = add_edge(*src, *dest, g);
                 wmap[e] = weight;
                 //printf("%f \t",weight);
-                boost::tie(e, inserted) = add_edge(*dest, *src, g);
-                wmap[e] = weight;
+                //boost::tie(e, inserted) = add_edge(*dest, *src, g);
+                //wmap[e] = weight;
 
-                printf("%f \t",weight);
+               // printf("%f \t",weight);
 
 
             }
