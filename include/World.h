@@ -5,6 +5,7 @@
 #include "Visualizer.h"
 #include "TooN/TooN.h"
 #include <vector>
+#include "MeshCreator.h"
 
 #define RAND(a,b)    ((a)+((b)-(a))*((double)(rand()%1000))/1000)
 
@@ -56,7 +57,9 @@ public:
     double GetLength();
     double GetMaxHeight();
     double GetMaxHeightInRect(double x, double y, double footprint_l);
+    double GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
 
+    int inter_cells_n;
 private:
 
     static World * instance;
@@ -67,6 +70,7 @@ private:
 
     bool bDrawGhost;
     bool bDraw;
+    MeshCreator mesh;
 
 };
 

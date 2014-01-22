@@ -8,7 +8,7 @@
 
 
 #define     DEG2RAD     3.14/180
-#define     FOV         92*DEG2RAD
+#define     FOV         90.1*DEG2RAD
 
 using namespace std;
 using namespace TooN;
@@ -42,7 +42,7 @@ public:
 
     double ResetInterestingness(){mesh.ResetMaxInterestingness();}
     double GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
-    double GetMaxInterestingness(){return mesh.maxInterestingness;}
+    double GetMaxInterestingness(){return 0.1;/*mesh.maxInterestingness;*/}
     double GetFootprint(double sensorHight);
     double GetHeightWithGootprint(double footprint_l);
 

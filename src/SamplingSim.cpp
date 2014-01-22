@@ -253,8 +253,16 @@ void keyboard_up_event(unsigned char key, int x, int y)
 SamplingSim::SamplingSim(int *argc, char **argv)
 {
     world = World::Instance();
+    if(*argc >= 2)
+        world->inter_cells_n = atoi(argv[1]);
+
+    if(*argc >= 3)
+        drone.branching_deg = atoi(argv[2]);
+
+
     // init GLUT
     glutInit(argc, argv);
+    world->PopulateWorld();
 }
 
 SamplingSim::~SamplingSim()
@@ -404,7 +412,7 @@ void SamplingSim::mainLoop()
     glEnable(GL_DEPTH_TEST);
     glutIgnoreKeyRepeat(true);
 
-    translateCamera(0, 0, 120);
+    translateCamera(0, 0, 50);
     rotateCamera(0,-1.57,0);
 
     // run glut

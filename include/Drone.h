@@ -4,7 +4,7 @@
 #include "World.h"
 #include "TSP.h"
 
-#define     MAX_DIST_TO_OBSTACLES   10
+#define     MAX_DIST_TO_OBSTACLES   1
 
 using namespace TooN;
 using namespace std;
@@ -40,6 +40,7 @@ public:
     void GoToNextWP(double step_l);
     void ChangeSpeed(double ds);
 
+    int branching_deg;
 private:
 
     bool SetExpandable(PlanNode &pn);

@@ -8,6 +8,7 @@ int MyRand(int n)
 
 Drone::Drone():sensor(makeVector(0,0,3))
 {
+    branching_deg = 2;
     speed = 20;
     levels = 0;
     executingPlan = false;
@@ -191,7 +192,7 @@ void Drone::GeneratePlan()
 
 void Drone::ExecutePlan()
 {
-    sensor.TurnOnSensing(true);
+    //sensor.TurnOnSensing(true);
     newPlan = true;
     executingPlan = true;
     gettimeofday(&scanStartTime, NULL);
@@ -370,10 +371,15 @@ void Drone::GoToNextWP(double step_l)
 
 bool Drone::SetExpandable(PlanNode &pn)
 {
-    if(pn.p[2] - World::Instance()->GetMaxHeightInRect(pn.p[0], pn.p[1], sensor.GetFootprint(pn.p[2])) >  MAX_DIST_TO_OBSTACLES)
+    double dh = pn.p[2] - World::Instance()->GetMaxHeightInRect(pn.p[0], pn.p[1], sensor.GetFootprint(pn.p[2]));
+    if(dh >  MAX_DIST_TO_OBSTACLES)
     {
+       // printf("dh ====  %f\n", dh);
         pn.expandable = true;
     }
+    else
+        pn.expandable = false;
+
 }
 
 void Drone::VisitWaypoint(PlanNode node)
@@ -382,7 +388,7 @@ void Drone::VisitWaypoint(PlanNode node)
         return;
 
     PlanNode tmp;
-    int child_n = 4;
+    int child_n = branching_deg;
     double footPrint_l = sensor.GetFootprint(node.p[2]);
     double next_fp = footPrint_l/child_n;
     double xx = node.p[0]-footPrint_l/2.0 + next_fp/2.0;
@@ -394,6 +400,13 @@ void Drone::VisitWaypoint(PlanNode node)
         for(int j=0; j<child_n; j++)
         {
             tmp.p = makeVector(xx + i*next_fp, yy + j*next_fp, zz);
+            double dh = tmp.p[2] - World::Instance()->GetMaxHeightInRect(tmp.p[0], tmp.p[1], sensor.GetFootprint(tmp.p[2]));
+            if(dh <  MAX_DIST_TO_OBSTACLES)
+            {
+               // printf("dh ====  %f\n", dh);
+                continue;
+            }
+
 //            if(tmp.p[2] - World::Instance()->GetMaxHeightInRect(tmp.p[0], tmp.p[1], next_fp) > 2*MAX_DIST_TO_OBSTACLES)
 //            {
 //                tmp.expandable = true;

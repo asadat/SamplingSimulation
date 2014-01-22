@@ -1,21 +1,54 @@
 #include "World.h"
+#include <stdio.h>
 
-#define WORLD_WIDTH     150
-#define WORLD_LENGTH    150
-#define WORLD_MAX_HEIGHT    15
+#include <cstdio>
+
+#define MAX(a,b)    (a>b?a:b)
+#define WORLD_WIDTH     64
+#define WORLD_LENGTH    64
+#define WORLD_MAX_HEIGHT    0.1
 
 World* World::instance = NULL;
 
 World::World():Visualizer()
 {
     //RegisterGlDrawing();
-
-   PopulateWorld();
-
-}
+    inter_cells_n = WORLD_WIDTH*WORLD_LENGTH/200;}
 
 void World::PopulateWorld()
 {
+//    FILE *f = fopen("result","r+");
+//    Vector<3> p;
+//    Vector<3> orig;
+//    bool orgset = false;
+//    float x,y,z;
+//    int nn=0;
+//    while(fscanf(f,"%f %f %f\n",&x,&y,&z) != EOF)
+//    {
+//        p[0] = x;
+//        p[1] = y;
+//        p[2] = z;
+
+//        nn++;
+//        p[0] *= 2000;
+//        p[1] *= 1000;
+//        p[2] /=40;
+//        if(!orgset)
+//        {
+//            orgset = true;
+//            orig = p;
+//        }
+
+//        p= p-orig;
+//        printf("===%f\t%f\t%f\n",p[0],p[1],p[2]);
+
+//       mesh.AddVertex(p);
+//    }
+
+//    printf("====== %d\n",nn);
+
+//    fclose(f);
+
     planes.clear();
     bDraw = true;
 
@@ -26,8 +59,8 @@ void World::PopulateWorld()
     // floor
 
 
-    int n = WORLD_WIDTH*WORLD_LENGTH/5000;
-    double maxL = 30;
+    int n = inter_cells_n;
+    double maxL = 1;
 
     InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);
 
@@ -35,11 +68,13 @@ void World::PopulateWorld()
     {
         double x,y,z;
         double lx,ly;
-        lx = RAND(0.2* maxL, 0.5* maxL);
-        ly = RAND(0.2* maxL, 0.5* maxL);
+        lx = 1;//RAND(0.2* maxL, 0.5* maxL);
+        ly = 1;//RAND(0.2* maxL, 0.5* maxL);
         x = RAND((-worldW/2+lx),(worldW/2-lx));
         y = RAND((-worldL/2+ly),(worldL/2-ly));
-        z = RAND(0.5, 1) * WORLD_MAX_HEIGHT;
+        x = floor(x);
+        y = floor(y);
+        z = /*RAND(0.5, 1) **/ WORLD_MAX_HEIGHT;
 
         InsertPlane(x-lx, y+ly, z, x+lx, y-ly, z);
     }
@@ -228,7 +263,7 @@ void World::glDraw()
     glColor3f(0,0,1);
 
     glBegin(GL_LINES);
-    double L = WORLD_WIDTH, l= WORLD_WIDTH/20;
+    double L = WORLD_WIDTH, l= 1;
     for(int i = 0; i<= L/l; i++)
     {
         double x,y;
@@ -298,6 +333,13 @@ void World::ToggleDraw()
         bDraw = false;
         bDrawGhost = false;
     }
+}
+
+double World::GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br)
+{
+    double result = 0;
+    result = GetMaxHeightInRect((tl[0]+br[0])/2, (tl[1]+br[1])/2, MAX(fabs(br[0]-tl[0]),fabs(br[1]-tl[1])));
+    return result;
 }
 
 double World::GetMaxHeightInRect(double x, double y, double footprint_l)

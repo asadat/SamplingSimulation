@@ -189,7 +189,8 @@ void FeatureTracker::MoveSensorTo(Vector<3,double> pos)
 
 double FeatureTracker::GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br)
 {
-    return mesh.GetInterestingness(tl,br);
+    //return mesh.GetInterestingness(tl,br);
+    World::Instance()->GetInterestingness(tl,br);
 }
 
 double FeatureTracker::GetFootprint(double sensorHight)

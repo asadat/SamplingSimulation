@@ -49,7 +49,7 @@ void MeshCreator::glDraw()
     glEnd();
 
     //Fill
-    double hR = 30;
+    double hR = 6;
     glColor3f(0.8,0.6,1);
     glLineWidth(2);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
