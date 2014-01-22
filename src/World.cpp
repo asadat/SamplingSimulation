@@ -4,8 +4,8 @@
 #include <cstdio>
 
 #define MAX(a,b)    (a>b?a:b)
-#define WORLD_WIDTH     32
-#define WORLD_LENGTH    32
+#define WORLD_WIDTH     64
+#define WORLD_LENGTH    64
 #define WORLD_MAX_HEIGHT    0.1
 
 World* World::instance = NULL;
