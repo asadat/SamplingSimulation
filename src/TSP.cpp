@@ -95,7 +95,6 @@ vector<Entity* > TSP::GetShortestPath_heu(vector<Entity* > to_visit)
 
 vector<Entity* > TSP::GetShortestPath(vector<Entity* > to_visit)
 {
-
     std::vector< Entity* > ent_in_order;
     vector<Vertex> shortest_path_vect;
     VertexListGraph g( to_visit.size());

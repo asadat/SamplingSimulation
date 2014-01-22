@@ -9,6 +9,7 @@
 using namespace TooN;
 
 SamplingSim * SamplingSim::instance = NULL;
+bool visualize = true;
 
 unsigned int updateMS = 33;
 bool doUpdate = false;
@@ -156,7 +157,8 @@ void render_event()
 
 
    // World::Instance()->glDraw();
-    Visualizer::glDrawAll();
+    if(visualize)
+        Visualizer::glDrawAll();
 
 
     glutSwapBuffers();
@@ -256,13 +258,35 @@ SamplingSim::SamplingSim(int *argc, char **argv)
     if(*argc >= 2)
         world->inter_cells_n = atoi(argv[1]);
 
-    if(*argc >= 3)
-        drone.branching_deg = atoi(argv[2]);
 
 
     // init GLUT
     glutInit(argc, argv);
     world->PopulateWorld();
+
+    if(*argc >= 4)
+    {
+        drone.init(atoi(argv[2]), atoi(argv[3]));
+    }
+    else
+    {
+        drone.init();
+    }
+
+    if(*argc >=5)
+    {
+        if(strcmp(argv[4],"-nov")==0)
+        {
+            visualize = false;
+            //printf("no visualzation\n");
+        }
+        else if(strcmp(argv[4],"-v")==0)
+        {
+                visualize = true;
+              //  printf("with visualzation\n");
+        }
+    }
+
 }
 
 SamplingSim::~SamplingSim()
@@ -387,6 +411,7 @@ void SamplingSim::idle()
 
 void SamplingSim::mainLoop()
 {
+
     glutInitWindowSize(800, 600);
     glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH);
     glutCreateWindow("SamplingSim");
@@ -412,7 +437,7 @@ void SamplingSim::mainLoop()
     glEnable(GL_DEPTH_TEST);
     glutIgnoreKeyRepeat(true);
 
-    translateCamera(0, 0, 50);
+    translateCamera(0, 0, 100);
     rotateCamera(0,-1.57,0);
 
     // run glut
@@ -421,9 +446,9 @@ void SamplingSim::mainLoop()
 
 int main(int argc, char **argv)
 {
-    printf("\n");
-    printf("\t1 ....... Toggle Environment Drawing\n");
-    printf("\t2 ....... Toggle Sensing\n\n");
+   // printf("\n");
+   // printf("\t1 ....... Toggle Environment Drawing\n");
+   // printf("\t2 ....... Toggle Sensing\n\n");
     SamplingSim::Instance(&argc, argv);
     SamplingSim::Instance()->mainLoop();
 

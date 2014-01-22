@@ -7,12 +7,14 @@
 #define WORLD_WIDTH     64
 #define WORLD_LENGTH    64
 #define WORLD_MAX_HEIGHT    0.1
+#define OBS_MAX_LENGHT  1
 
 World* World::instance = NULL;
 
 World::World():Visualizer()
 {
     //RegisterGlDrawing();
+    bDrawGhost = false;
     inter_cells_n = WORLD_WIDTH*WORLD_LENGTH/200;}
 
 void World::PopulateWorld()
@@ -60,7 +62,7 @@ void World::PopulateWorld()
 
 
     int n = inter_cells_n;
-    double maxL = 1;
+    double maxL = OBS_MAX_LENGHT;
 
     InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);
 
@@ -89,14 +91,27 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2)
     {
         if(i==0)
         {
+            bool floor = false;
+            if((p2-p1)[0] > 10)
+            {
+                floor = true;
+            }
+
             //glColor3f(0,1,0);
             if(bDrawGhost)
             {
-                glColor4f(233.0/255, 227.0/255, 133.0/255,0.5);
+                if(floor)
+                    glColor4f(233.0/255, 227.0/255, 133.0/255,0.5);
+                else
+                    glColor4f(205.0/255, 92.0/255, 92.0/255,0.5);
+                    //glColor4f(135.0/255, 121.0/255, 78.0/255,0.5);
             }
             else
             {
-                glColor3f(233.0/255, 227.0/255, 133.0/255);
+                if(floor)
+                    glColor3f(233.0/255, 227.0/255, 133.0/255);
+                else
+                    glColor3f(205.0/255, 92.0/255, 92.0/255);
             }
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -345,8 +360,8 @@ double World::GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, dou
 double World::GetMaxHeightInRect(double x, double y, double footprint_l)
 {
     double mxheight=0;
-    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=0.2)
-        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=0.2)
+    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=OBS_MAX_LENGHT)
+        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=OBS_MAX_LENGHT)
         {
             double h = GetHeight(i,j);
             mxheight = (mxheight < h)?h:mxheight;

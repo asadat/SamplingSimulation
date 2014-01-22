@@ -15,6 +15,7 @@ struct PlanNode
     double interestingness;
     vector<PlanNode> children;
     bool expandable;
+    bool homeNode;
 };
 
 class Drone:public Visualizer
@@ -26,10 +27,13 @@ public:
     void glDraw();
     void Update();
 
+    void init(int branchingDeg=2, int startlvl=2);
+
     void MoveSensor(TooN::Vector<3,double> dPos);
     Vector<3> GetPose();
     void GoLevelDown();
     void GoLevelUp();
+    void GoToLevel(int lvl);
     void ToggleStealthMode();
     void ToggleDrawInterestingness();
 
@@ -47,7 +51,7 @@ private:
     void VisitWaypoint(PlanNode node);
     void GenerateCoveragePlan(double w_w, double w_l, double flying_height);
     void OnLevelPlanExecuted();
-
+    double PathLength(vector< PlanNode > & path);
     FeatureTracker sensor;
 
     bool newPlan;
@@ -67,5 +71,6 @@ private:
     Vector<3> homePos;
     vector<Entity*> shortestPath;
     TSP tsp;
+    double surveyLength;
 
 };
