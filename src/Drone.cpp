@@ -482,7 +482,7 @@ void Drone::OnLevelPlanExecuted()
 */
     en = new Entity();
     en->pos = homePos;
-    en->pos[0]=tspoint.back()->pos[2];
+    en->pos[2]=tspoint.back()->pos[2];
     en->end = true;
     en->nodeIdx = -2;
     //tspoint.push_back(en);
@@ -516,7 +516,18 @@ void Drone::OnLevelPlanExecuted()
         {
             PlanNode pn;
             pn.p = homePos;
+            double height;
+            if(!pathWPs.empty())
+            {
+                height = pathWPs.back().p[2];
+            }
+            else
+                height = GetPose()[2];
+
+            pn.p[2] = height;
+
             pathWPs.push_back(pn);
+
         }
         if(shortestPath[i]->nodeIdx == -1)
         {

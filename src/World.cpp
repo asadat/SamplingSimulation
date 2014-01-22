@@ -4,8 +4,8 @@
 #include <cstdio>
 
 #define MAX(a,b)    (a>b?a:b)
-#define WORLD_WIDTH     64
-#define WORLD_LENGTH    64
+#define WORLD_WIDTH     32
+#define WORLD_LENGTH    32
 #define WORLD_MAX_HEIGHT    0.1
 
 World* World::instance = NULL;
@@ -68,8 +68,8 @@ void World::PopulateWorld()
     {
         double x,y,z;
         double lx,ly;
-        lx = 1;//RAND(0.2* maxL, 0.5* maxL);
-        ly = 1;//RAND(0.2* maxL, 0.5* maxL);
+        lx = maxL;//RAND(0.2* maxL, 0.5* maxL);
+        ly = maxL;//RAND(0.2* maxL, 0.5* maxL);
         x = RAND((-worldW/2+lx),(worldW/2-lx));
         y = RAND((-worldL/2+ly),(worldL/2-ly));
         x = floor(x);
@@ -259,26 +259,26 @@ void World::glDraw()
     if(!bDraw)
         return;
 
-    glLineWidth(2);
-    glColor3f(0,0,1);
+//    glLineWidth(2);
+//    glColor3f(0,0,1);
 
-    glBegin(GL_LINES);
-    double L = WORLD_WIDTH, l= 1;
-    for(int i = 0; i<= L/l; i++)
-    {
-        double x,y;
-        x = -L/2;
-        y = -L/2 + ((double)i)*l;
+//    glBegin(GL_LINES);
+//    double L = WORLD_WIDTH, l= 1;
+//    for(int i = 0; i<= L/l; i++)
+//    {
+//        double x,y;
+//        x = -L/2;
+//        y = -L/2 + ((double)i)*l;
 
-        glVertex3f(x,y,0);
-        glVertex3f(x+L,y,0);
+//        glVertex3f(x,y,0);
+//        glVertex3f(x+L,y,0);
 
-        glVertex3f(y,x,0);
-        glVertex3f(y,x+L,0);
+//        glVertex3f(y,x,0);
+//        glVertex3f(y,x+L,0);
 
 
-    }
-    glEnd();
+//    }
+//    glEnd();
 
     for(int i=0 ; i<planes.size(); i++)
     {
