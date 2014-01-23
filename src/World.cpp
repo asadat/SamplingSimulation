@@ -17,8 +17,11 @@ World::World():Visualizer()
     bDrawGhost = false;
     inter_cells_n = WORLD_WIDTH*WORLD_LENGTH/200;}
 
-void World::PopulateWorld()
+void World::PopulateWorld(int int_cells)
 {
+    if(int_cells >0)
+        inter_cells_n = int_cells;
+
 //    FILE *f = fopen("result","r+");
 //    Vector<3> p;
 //    Vector<3> orig;
@@ -66,7 +69,8 @@ void World::PopulateWorld()
 
     InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0);
 
-    for(int i=0; i<n; i++)
+    int ii=0;
+    while(ii<n)
     {
         double x,y,z;
         double lx,ly;
@@ -77,8 +81,11 @@ void World::PopulateWorld()
         x = floor(x);
         y = floor(y);
         z = /*RAND(0.5, 1) **/ WORLD_MAX_HEIGHT;
-
-        InsertPlane(x-lx, y+ly, z, x+lx, y-ly, z);
+        if(GetHeight(x,y)<= 0.0001)
+        {
+            ii++;
+            InsertPlane(x-lx, y+ly, z, x+lx, y-ly, z);
+        }
     }
 
 }
@@ -353,7 +360,7 @@ void World::ToggleDraw()
 double World::GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br)
 {
     double result = 0;
-    result = GetMaxHeightInRect((tl[0]+br[0])/2, (tl[1]+br[1])/2, MAX(fabs(br[0]-tl[0]),fabs(br[1]-tl[1])));
+    result = GetMaxHeightInRect((tl[0]+br[0])/2, (tl[1]+br[1])/2, MAX(fabs(br[0]-tl[0]),fabs(br[1]-tl[1])-0.01));
     return result;
 }
 

@@ -52,14 +52,13 @@ public:
     double GetHeight(double x, double y);
     void InsertPlane(double x1, double y1, double z1, double x2, double y2, double z2);
     void ToggleDraw();
-    void PopulateWorld();
+    void PopulateWorld(int int_cells=-1);
     double GetWidth();
     double GetLength();
     double GetMaxHeight();
     double GetMaxHeightInRect(double x, double y, double footprint_l);
     double GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
-
-    int inter_cells_n;
+    int GetNumOfIntCells(){return inter_cells_n;}
 private:
 
     static World * instance;
@@ -71,6 +70,8 @@ private:
     bool bDrawGhost;
     bool bDraw;
     MeshCreator mesh;
+    int inter_cells_n;
+
 
 };
 

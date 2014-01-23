@@ -8,7 +8,7 @@ public:
 
     ~SamplingSim();
 
-    static SamplingSim * Instance(int *argc=NULL, char **argv=NULL)
+    static SamplingSim * Instance(int argc=0, char **argv=NULL)
     {
         if(instance == NULL)
         {
@@ -24,10 +24,11 @@ public:
 
 
 private:
+
+    SamplingSim(int argc, char **argv);
+    static SamplingSim* instance;
+
     World * world;
     Drone drone;
-    static SamplingSim* instance;
-    SamplingSim(int *argc, char **argv);
-
 
 };

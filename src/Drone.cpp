@@ -8,6 +8,8 @@ int MyRand(int n)
 
 Drone::Drone():sensor(makeVector(0,0,3))
 {
+    strategy = BREADTH_FIRST;
+
     sensor.TurnOnSensing(false);
     sensor.ClearHistory();
 
@@ -38,8 +40,9 @@ Drone::~Drone()
 
 }
 
-void Drone::init(int branchingDeg, int startlvl)
+void Drone::init(int branchingDeg, int startlvl, Traverse_Strategy st)
 {
+    strategy = st;
     branching_deg = branchingDeg;
     levels = startlvl;
     GoToLevel(levels);
@@ -120,6 +123,24 @@ void Drone::glDraw()
         }
     }
 
+    if(!pathWPs.empty())
+    {
+        Vector<3> wpp = pathWPs.front().p;
+        double ftl = sensor.GetFootprint(wpp[2]);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glColor4f(0.6,0,1,0.2);
+
+        double h = 0.01;
+        glBegin(GL_POLYGON);
+        glVertex3f(wpp[0]-ftl/2, wpp[1]-ftl/2, h);
+        glVertex3f(wpp[0]+ftl/2, wpp[1]-ftl/2, h);
+        glVertex3f(wpp[0]+ftl/2, wpp[1]+ftl/2, h);
+        glVertex3f(wpp[0]-ftl/2, wpp[1]+ftl/2, h);
+        glVertex3f(wpp[0]-ftl/2, wpp[1]-ftl/2, h);
+        glEnd();
+    }
+
 }
 
 void Drone::Update()
@@ -159,6 +180,7 @@ void Drone::Update()
 
 void Drone::MoveSensor(TooN::Vector<3,double> dPos)
 {
+    surveyLength += sqrt(dPos*dPos);
     sensor.MoveSensor(dPos);
 }
 
@@ -334,7 +356,7 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
 
     }
 
-    surveyLength += PathLength(pathWPs);
+    //surveyLength += PathLength(pathWPs);
 
     PlanNode pn;
     pn.expandable = false;
@@ -414,11 +436,11 @@ void Drone::GoToNextWP(double step_l)
                 if(pathWPs.size() == 1 && nextPath.empty())
                 {
                     sensor.TurnOnSensing(false);
-
+                    pathWPs[0].p[2] = GetPose()[2];
                     //add the cost of returning home to the total path length
-                    Vector<3> dp = pathWPs[0].p-GetPose();
-                    surveyLength += sqrt(dp*dp);
-                    printf("%d %f\n", World::Instance()->inter_cells_n, surveyLength);
+                    //Vector<3> dp = pathWPs[0].p-GetPose();
+                    //surveyLength += sqrt(dp*dp);
+
                 }
 
                 //determin next waypoint : consider obstacles
@@ -431,6 +453,7 @@ void Drone::GoToNextWP(double step_l)
 
     if(!flag)
     {
+        printf("%d %f\n", World::Instance()->GetNumOfIntCells(), surveyLength);
         exit(0);
     }
 }
@@ -473,13 +496,23 @@ void Drone::VisitWaypoint(PlanNode node)
                 continue;
             }
 
-//            if(tmp.p[2] - World::Instance()->GetMaxHeightInRect(tmp.p[0], tmp.p[1], next_fp) > 2*MAX_DIST_TO_OBSTACLES)
-//            {
-//                tmp.expandable = true;
-//            }
+            double footprint_l = sensor.GetFootprint(tmp.p[2]);
+            Vector<2, double > tl = makeVector(tmp.p[0]-footprint_l/2, tmp.p[1]+footprint_l/2);
+            Vector<2, double > rb = makeVector(tmp.p[0]+footprint_l/2, tmp.p[1]-footprint_l/2);
+            tmp.interestingness = sensor.GetInterestingness(tl,rb)/sensor.GetMaxInterestingness();
+
             SetExpandable(tmp);
-            nextPath.push_back(tmp);
-            //pathWPs.insert(pathWPs.begin()+1,tmp);
+            if(tmp.interestingness > 0.2)
+            {
+                if(strategy == BREADTH_FIRST)
+                {
+                    nextPath.push_back(tmp);
+                }
+                else if(strategy == DEPTH_FIRST)
+                {
+                    pathWPs.insert(pathWPs.begin()+1,tmp);
+                }
+            }
         }
 }
 
@@ -502,13 +535,13 @@ void Drone::OnLevelPlanExecuted()
 
     sensor.ResetInterestingness();
     curLevel++;
-    for(int i=0; i< nextPath.size(); i++)
-    {
-        double footprint_l = sensor.GetFootprint(nextPath[i].p[2]);
-        Vector<2, double > tl = makeVector(nextPath[i].p[0]-footprint_l/2, nextPath[i].p[1]+footprint_l/2);
-        Vector<2, double > rb = makeVector(nextPath[i].p[0]+footprint_l/2, nextPath[i].p[1]-footprint_l/2);
-        nextPath[i].interestingness = sensor.GetInterestingness(tl,rb);
-    }
+//    for(int i=0; i< nextPath.size(); i++)
+//    {
+//        double footprint_l = sensor.GetFootprint(nextPath[i].p[2]);
+//        Vector<2, double > tl = makeVector(nextPath[i].p[0]-footprint_l/2, nextPath[i].p[1]+footprint_l/2);
+//        Vector<2, double > rb = makeVector(nextPath[i].p[0]+footprint_l/2, nextPath[i].p[1]-footprint_l/2);
+//        nextPath[i].interestingness = sensor.GetInterestingness(tl,rb);
+//    }
 
     tspoint.clear();
 
@@ -524,7 +557,7 @@ void Drone::OnLevelPlanExecuted()
     for(int i=0; i<nextPath.size();i++)
     {
         //printf("%f ", nextPath[i].interestingness/sensor.GetMaxInterestingness());
-        if(nextPath[i].interestingness/sensor.GetMaxInterestingness() > /*(curLevel-1)**/0.2)
+       /// if(nextPath[i].interestingness/sensor.GetMaxInterestingness() > /*(curLevel-1)**/0.2)
         {
             //printf("%f ",nextPath[i].entropy/sensor.GetMaxEntropy());
             en = new Entity();
@@ -580,7 +613,7 @@ void Drone::OnLevelPlanExecuted()
         }
         else if(shortestPath[i]->nodeIdx == -2)
         {
-            surveyLength += PathLength(pathWPs);
+            //surveyLength += PathLength(pathWPs);
             PlanNode pn;
             pn.p = homePos;
             pn.homeNode = true;

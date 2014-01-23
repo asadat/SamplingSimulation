@@ -252,41 +252,54 @@ void keyboard_up_event(unsigned char key, int x, int y)
     Key[key] = false;
 }
 
-SamplingSim::SamplingSim(int *argc, char **argv)
+SamplingSim::SamplingSim(int argc, char **argv)
 {
-    world = World::Instance();
-    if(*argc >= 2)
-        world->inter_cells_n = atoi(argv[1]);
+    int bdeg=2;
+    int speed=2000;
+    int int_cells=100;
+    int startlvl=2;
+    Drone::Traverse_Strategy strategy = Drone::BREADTH_FIRST;
 
-
-
-    // init GLUT
-    glutInit(argc, argv);
-    world->PopulateWorld();
-
-    if(*argc >= 4)
+    for(int i=1; i<argc;i++)
     {
-        drone.init(atoi(argv[2]), atoi(argv[3]));
-    }
-    else
-    {
-        drone.init();
-    }
-
-    if(*argc >=5)
-    {
-        if(strcmp(argv[4],"-nov")==0)
+        if(strcmp(argv[i],"-b")==0)
+        {
+            bdeg = atoi(argv[++i]);
+        }
+        else if(strcmp(argv[i],"-s")==0)
+        {
+            speed = atoi(argv[++i]);
+            printf("Speed: %d\n", speed);
+        }
+        else if(strcmp(argv[i],"-n")==0)
+        {
+            int_cells = atoi(argv[++i]);
+        }
+        else if(strcmp(argv[i],"-l")==0)
+        {
+            startlvl = atoi(argv[++i]);
+        }
+        else if(strcmp(argv[i],"-nov")==0)
         {
             visualize = false;
-            //printf("no visualzation\n");
         }
-        else if(strcmp(argv[4],"-v")==0)
+        else if(strcmp(argv[i],"-breadth")==0)
         {
-                visualize = true;
-              //  printf("with visualzation\n");
+            strategy = Drone::BREADTH_FIRST;
+        }
+        else if(strcmp(argv[i],"-depth")==0)
+        {
+            strategy = Drone::DEPTH_FIRST;
         }
     }
 
+    world = World::Instance();
+    glutInit(&argc, argv);
+
+    world->PopulateWorld(int_cells);
+
+    drone.speed = speed;
+    drone.init(bdeg, startlvl, strategy);
 }
 
 SamplingSim::~SamplingSim()
@@ -446,10 +459,11 @@ void SamplingSim::mainLoop()
 
 int main(int argc, char **argv)
 {
+
    // printf("\n");
    // printf("\t1 ....... Toggle Environment Drawing\n");
    // printf("\t2 ....... Toggle Sensing\n\n");
-    SamplingSim::Instance(&argc, argv);
+    SamplingSim::Instance(argc, argv);
     SamplingSim::Instance()->mainLoop();
 
     return 0;
