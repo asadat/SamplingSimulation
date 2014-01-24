@@ -269,7 +269,6 @@ SamplingSim::SamplingSim(int argc, char **argv)
         else if(strcmp(argv[i],"-s")==0)
         {
             speed = atoi(argv[++i]);
-            printf("Speed: %d\n", speed);
         }
         else if(strcmp(argv[i],"-n")==0)
         {

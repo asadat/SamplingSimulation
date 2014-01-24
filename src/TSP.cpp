@@ -1,5 +1,6 @@
 #include "TSP.h"
 #include <stdio.h>
+//#define DIST(a,b)   sqrt((a-b)*(a-b))
 
 double d(Vector<3> a, Vector<3> b)
 {
@@ -119,8 +120,29 @@ vector<Entity* > TSP::GetShortestPath(vector<Entity* > to_visit)
         ent_in_order.push_back( verts_to_ent[*itr] );
     }
 
+    TwoOptOptimization(ent_in_order);
+    //TwoOptOptimization(ent_in_order);
+    //TwoOptOptimization(ent_in_order);
+    //TwoOptOptimization(ent_in_order);
     return ent_in_order;
 
+
+
+
+}
+
+void TSP::TwoOptOptimization(vector<Entity *> &path)
+{
+    for(int i=0; i+3<path.size(); i++)
+    {
+        if(d(path[i]->pos,path[i+2]->pos) + d(path[i+2]->pos,path[i+1]->pos) + d(path[i+1]->pos,path[i+3]->pos) <
+                d(path[i]->pos,path[i+1]->pos) + d(path[i+1]->pos,path[i+2]->pos) + d(path[i+2]->pos,path[i+3]->pos))
+        {
+            Entity* i_2 = path[i+2];
+            path.erase(path.begin()+i+2);
+            path.insert(path.begin()+i+1, i_2);
+        }
+    }
 }
 
 map<TSP::Vertex, Entity*> TSP::map_vertices_to_entities(vector<Entity*> entities, VertexListGraph &g)

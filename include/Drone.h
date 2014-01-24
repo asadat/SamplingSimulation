@@ -14,8 +14,14 @@ struct PlanNode
     Vector<3> p;
     double interestingness;
     vector<PlanNode*> children;
+    PlanNode* parent;
+
+    bool visited;
     bool expandable;
     bool homeNode;
+
+    bool observationHeightFixed;
+
 };
 
 class Drone:public Visualizer
@@ -55,6 +61,7 @@ private:
     void GenerateCoveragePlan(double w_w, double w_l, double flying_height);
     void OnLevelPlanExecuted();
     double PathLength(vector< PlanNode* > & path);
+    void AddChild(PlanNode* parent, PlanNode* child);
     FeatureTracker sensor;
 
     bool newPlan;

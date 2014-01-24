@@ -48,6 +48,7 @@ class TSP: public Visualizer
 
     private:
 
+        void TwoOptOptimization(vector<Entity* > &path);
         void Sort(vector<Entity* >& list, Vector<3> s);
         map<Vertex, Entity*> map_vertices_to_entities(vector<Entity*> entities, VertexListGraph &g);
         void create_connected_graph(VertexListGraph &g, WeightMap wmap, std::map<Vertex,Entity*> vmap);
