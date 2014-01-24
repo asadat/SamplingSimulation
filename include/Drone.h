@@ -20,6 +20,8 @@ struct PlanNode
     bool expandable;
     bool homeNode;
 
+    int depth;
+    int tentative;
     bool observationHeightFixed;
 
 };
@@ -51,15 +53,15 @@ public:
     void GoToNextWP(double step_l);
     void ChangeSpeed(double ds);
 
-
+    static PlanNode * CreatePlanNode();
     double speed;
 
 private:
-
+    void GenerateTentativeSubtree(PlanNode * root, int tree_depth);
     bool SetExpandable(PlanNode *pn);
     void VisitWaypoint(PlanNode *node);
     void GenerateCoveragePlan(double w_w, double w_l, double flying_height);
-    void OnLevelPlanExecuted();
+    void PlanForLevel();
     double PathLength(vector< PlanNode* > & path);
     void AddChild(PlanNode* parent, PlanNode* child);
     FeatureTracker sensor;

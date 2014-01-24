@@ -290,6 +290,10 @@ SamplingSim::SamplingSim(int argc, char **argv)
         {
             strategy = Drone::DEPTH_FIRST;
         }
+        else if(strcmp(argv[i],"-shortcut")==0)
+        {
+            strategy = Drone::SHORTCUT_1;
+        }
     }
 
     world = World::Instance();
