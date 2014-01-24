@@ -13,7 +13,7 @@ struct PlanNode
 {
     Vector<3> p;
     double interestingness;
-    vector<PlanNode> children;
+    vector<PlanNode*> children;
     bool expandable;
     bool homeNode;
 };
@@ -50,11 +50,11 @@ public:
 
 private:
 
-    bool SetExpandable(PlanNode &pn);
-    void VisitWaypoint(PlanNode node);
+    bool SetExpandable(PlanNode *pn);
+    void VisitWaypoint(PlanNode *node);
     void GenerateCoveragePlan(double w_w, double w_l, double flying_height);
     void OnLevelPlanExecuted();
-    double PathLength(vector< PlanNode > & path);
+    double PathLength(vector< PlanNode* > & path);
     FeatureTracker sensor;
 
     bool newPlan;
@@ -67,8 +67,8 @@ private:
     Traverse_Strategy strategy;
 
     //executed path
-    vector< PlanNode > pathWPs;
-    vector< PlanNode > nextPath;
+    vector< PlanNode* > pathWPs;
+    vector< PlanNode* > nextPath;
 
     vector<Entity*> tspoint;
 
