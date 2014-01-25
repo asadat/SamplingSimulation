@@ -8,6 +8,7 @@ int MyRand(int n)
 
 Drone::Drone():sensor(makeVector(0,0,3))
 {
+    tree.CreateTree();
     strategy = BREADTH_FIRST;
 
     sensor.TurnOnSensing(false);
@@ -37,7 +38,7 @@ Drone::Drone():sensor(makeVector(0,0,3))
 
 Drone::~Drone()
 {
-
+    tree.Destroy();
 }
 
 void Drone::init(int branchingDeg, int startlvl, Traverse_Strategy st)
@@ -69,6 +70,8 @@ void Drone::glDraw()
 //        glEnd();
 //    }
 
+//    tree.glDraw();
+
     // draw path
     for(int i=0; i<pathWPs.size(); i++)
     {
@@ -92,14 +95,14 @@ void Drone::glDraw()
     }
 
     //Draw Next WPs
-    glColor3f(0,1,0);
-    glPointSize(10);
-    glBegin(GL_POINTS);
-    for(int i=0; i<nextPath.size(); i++)
-    {
-        glVertex3f(nextPath[i]->p[0], nextPath[i]->p[1], nextPath[i]->p[2]);
-    }
-    glEnd();
+//    glColor3f(0,1,0);
+//    glPointSize(10);
+//    glBegin(GL_POINTS);
+//    for(int i=0; i<nextPath.size(); i++)
+//    {
+//        glVertex3f(nextPath[i]->p[0], nextPath[i]->p[1], nextPath[i]->p[2]);
+//    }
+//    glEnd();
 
 
 //    for(int i=0; i<shortestPath.size(); i++)
@@ -261,6 +264,8 @@ void Drone::DestroyPlan()
         delete nextPath[i];
     }
     nextPath.clear();
+
+    tree.Destroy();
 }
 
 void Drone::AddChild(PlanNode* parent, PlanNode* child)
@@ -307,9 +312,14 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
     nextPath.clear();
     //printf("start point: %f %f %f", pose[0], pose[1], pose[2]);
 
-    PlanNode * root = CreatePlanNode();
-    root->visited = true;
-    root->parent = NULL;
+ //   printf("here3\n");
+
+    tree.CreateTree();
+    tree.root->p = makeVector(0,0,sensor.GetHeightWithGootprint(w_w));
+
+    //PlanNode * root = CreatePlanNode();
+    //root->visited = true;
+    //root->parent = NULL;
 
     bool alternateFlag = false;
     for(int i=0; i< ceil(w_w/footPrint_l); i++)
@@ -328,18 +338,31 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
             pn->p = makeVector(x,y, scanHeight);
             SetExpandable(pn);
             pathWPs.push_back(pn);
-            AddChild(root, pn);
+            tree.AddChild(tree.root, pn);
         }
 
     }
 
-    //surveyLength += PathLength(pathWPs);
+   // printf("here1\n");
 
-    PlanNode *pn= CreatePlanNode();
-    pn->expandable = false;
-    pn->p = startPoint;
-    pn->homeNode = true;
-    pathWPs.push_back(pn);
+    int lvl = 1;
+    while(tree.levelNodes.find(lvl) != tree.levelNodes.end())
+    {
+        vector<PlanNode*> & lvlnds = tree.levelNodes[lvl];
+        for(int i=0; i<lvlnds.size();i++)
+        {
+            GenerateSubtree(lvlnds[i],1);
+        }
+
+        lvl++;
+    }
+
+//    printf("here2\n");
+//    PlanNode *pn= CreatePlanNode();
+//    pn->expandable = false;
+//    pn->p = startPoint;
+//    pn->homeNode = true;
+//    pathWPs.push_back(pn);
 
 
 }
@@ -389,43 +412,50 @@ void Drone::GoToNextWP(double step_l)
 
         if(reachedWP)
         {
+            //printf("hello\n");
             int curLvl = goalNode->depth;
             //delete the reached node
             pathWPs.erase(pathWPs.begin());
-            VisitWaypoint(goalNode);
+            //VisitWaypoint(goalNode);
 
 
-            if(pathWPs.size() == 1)
+            if(pathWPs.size() == 0)
             {
                 //goto next depth
-                if(strategy == BREADTH_FIRST && !nextPath.empty())
+                if(strategy == BREADTH_FIRST && tree.levelNodes.find(curLvl+1) != tree.levelNodes.end() /*&& !nextPath.empty()*/)
                 {
                     //delete the home node
-                    delete pathWPs[0];
-                    pathWPs.clear();
+                    //delete pathWPs[0];
+                    //pathWPs.clear();
 
-                    PlanForLevel();
+                    PlanForLevel(curLvl+1);
                 }
                 else //go back to home position
                 {
+                    PlanNode * home = CreatePlanNode();
+                    home->p = homePos;
+                    home->homeNode = true;
+                    pathWPs.push_back(home);
+
                     sensor.TurnOnSensing(false);
                     pathWPs[0]->p[2] = GetPose()[2];
                 }
             }
-            else if(strategy == SHORTCUT_1)
-            {
-                if(curLvl > pathWPs[0]->depth)
-                {
-                    PlanNode *nextp = pathWPs.front();
-                    pathWPs.erase(pathWPs.begin());
-                    GenerateTentativeSubtree(nextp, curLvl-nextp->depth);
+//            else if(strategy == SHORTCUT_1)
+//            {
+//                if(curLvl > pathWPs[0]->depth)
+//                {
+//                    PlanNode *nextp = pathWPs.front();
+//                    pathWPs.erase(pathWPs.begin());
+//                    GenerateSubtree(nextp, curLvl-nextp->depth);
 
-                    delete nextp;
-                }
-            }
+//                    delete nextp;
+//                }
+//            }
 
-            delete goalNode;
+            //delete goalNode;
 
+            //printf("hi\n");
         }
     }
     else
@@ -448,13 +478,12 @@ bool Drone::SetExpandable(PlanNode *pn)
 
 }
 
-void Drone::GenerateTentativeSubtree(PlanNode *node, int tree_depth)
+void Drone::GenerateSubtree(PlanNode *node, int tree_depth)
 {
-
     if(!node->expandable)
         return;
 
-    printf("Generating subtree: from level %d for depth %d\n", node->depth, tree_depth);
+    //printf("Generating subtree: from level %d for depth %d\n", node->depth, tree_depth);
     PlanNode *tmp;
 
     int child_n = branching_deg;
@@ -496,9 +525,10 @@ void Drone::GenerateTentativeSubtree(PlanNode *node, int tree_depth)
 //                }
 //                else if(strategy == DEPTH_FIRST)
                 {
-                    //AddChild(node, tmp);
-                    tmp->depth = node->depth+tree_depth;
-                    pathWPs.insert(pathWPs.begin(),tmp);
+                    tree.AddChild(node, tmp);
+                    //tmp->depth = node->depth+tree_depth;
+                    //pathWPs.insert(pathWPs.begin(),tmp);
+                    //pathWPs.push_back(tmp);
                 }
             }
 //            else
@@ -506,7 +536,6 @@ void Drone::GenerateTentativeSubtree(PlanNode *node, int tree_depth)
 //                delete tmp;
 //            }
         }
-
 }
 
 void Drone::VisitWaypoint(PlanNode* node)
@@ -563,7 +592,7 @@ void Drone::VisitWaypoint(PlanNode* node)
         }
 }
 
-void Drone::PlanForLevel()
+void Drone::PlanForLevel(int depth)
 {
     timeval scanEnd;
     gettimeofday(&scanEnd,NULL);
@@ -571,10 +600,10 @@ void Drone::PlanForLevel()
     double totalTime = (-scanStartTime.tv_sec + scanEnd.tv_sec);      // sec to ms
     totalTime += (-scanStartTime.tv_usec + scanEnd.tv_usec) / 1000000.0;   // us to ms
 
-    if(nextPath.empty())
-    {
-        return;
-    }
+//    if(nextPath.empty())
+//    {
+//        return;
+//    }
 
     sensor.ResetInterestingness();
     curLevel++;
@@ -587,12 +616,16 @@ void Drone::PlanForLevel()
     en->nodeIdx = -1;
     tspoint.push_back(en);
 
-    for(int i=0; i<nextPath.size();i++)
+    vector<PlanNode*> &nlnds = tree.levelNodes[depth];
+    for(int i=0; i<nlnds.size();i++)
     {
+        if(nlnds[i]->interestingness > 0.2)
+        {
             en = new Entity();
-            en->pos = nextPath[i]->p;
+            en->pos = nlnds[i]->p;
             en->nodeIdx = i;
             tspoint.push_back(en);
+        }
     }
 
 
@@ -604,31 +637,31 @@ void Drone::PlanForLevel()
 
     shortestPath.clear();
     shortestPath = tsp.GetShortestPath(tspoint);
-    shortestPath.push_back(en);
+    //shortestPath.push_back(en);
 
     for(int i=0; i<shortestPath.size();i++)
     {
         if(shortestPath[i]->nodeIdx >= 0) // other nodes
         {
-            pathWPs.push_back(nextPath[shortestPath[i]->nodeIdx]);
+            pathWPs.push_back(nlnds[shortestPath[i]->nodeIdx]);
         }
         else if(shortestPath[i]->nodeIdx == -2) // the home node
         {
-            //surveyLength += PathLength(pathWPs);
-            PlanNode* pn = CreatePlanNode();
-            pn->p = homePos;
-            pn->homeNode = true;
-            double height;
-            if(!pathWPs.empty())
-            {
-                height = pathWPs.back()->p[2];
-            }
-            else
-                height = GetPose()[2];
 
-            pn->p[2] = height;
+//            PlanNode* pn = CreatePlanNode();
+//            pn->p = homePos;
+//            pn->homeNode = true;
+//            double height;
+//            if(!pathWPs.empty())
+//            {
+//                height = pathWPs.back()->p[2];
+//            }
+//            else
+//                height = GetPose()[2];
 
-            pathWPs.push_back(pn);
+//            pn->p[2] = height;
+
+//            pathWPs.push_back(pn);
 
         }
         if(shortestPath[i]->nodeIdx == -1) // the start node (current position)
@@ -655,13 +688,13 @@ void Drone::PlanForLevel()
     }
     //tspoint.clear();
 
-    while(!nextPath.empty())
-    {
-        PlanNode * p = nextPath.back();
-        nextPath.pop_back();
-        // nodes will be destroyed when visited
-        // delete p;
-    }
+//    while(!nextPath.empty())
+//    {
+//        PlanNode * p = nextPath.back();
+//        nextPath.pop_back();
+//        // nodes will be destroyed when visited
+//        // delete p;
+//    }
 
 //    for(int i=0; i<nextPath.size(); i++)
 //    {
