@@ -40,7 +40,7 @@ public:
     double GetSamplingLevels(int &level);
     void SetPose(Vector<3, double> newpose);
 
-    double ResetInterestingness(){mesh.ResetMaxInterestingness();}
+    void ResetInterestingness(){mesh.ResetMaxInterestingness();}
     double GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
     double GetMaxInterestingness(){return 0.1;/*mesh.maxInterestingness;*/}
     double GetFootprint(double sensorHight);

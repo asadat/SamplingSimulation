@@ -141,7 +141,7 @@ public:
 
 private:
     void GenerateSubtree(PlanNode * root, int tree_depth);
-    bool SetExpandable(PlanNode *pn);
+    void SetExpandable(PlanNode *pn);
     void VisitWaypoint(PlanNode *node);
     void GenerateCoveragePlan(double w_w, double w_l, double flying_height);
     void PlanForLevel(int depth);

@@ -2,26 +2,24 @@ cmake_minimum_required(VERSION 2.4.6 FATAL_ERROR)
 
 SET(ProjName SamplingSimulation)
 
+#uncomment for mac
 #include_directories("include")
 #include_directories("/usr/local/include/TooN")
 #include_directories("/usr/include")
 #include_directories("/opt/X11/include")
 #include_directories("/opt/local/include")
-
-
+#include_directories("/usr/local/include")
 #link_directories("/opt/X11/lib")
 #link_directories("/usr/lib/x86_64-linux-gnu")
 #link_directories("/usr/local/lib/TooN")
 #link_directories("/opt/local/lib")
+#link_directories("/usr/local/lib")
 
-
+#uncomment for ubuntu
 include_directories("./include")
 include_directories("./include/tree")
 include_directories("./TooN/include")
 include_directories("/usr/include")
-
-#link_directories(${PCL_LIBRARY_DIRS})
-#link_directories("G:/Matlab/extern/lib/win32/microsoft")
 link_directories("/usr/lib/x86_64-linux-gnu")
 link_directories("/usr/lib")
 
@@ -49,5 +47,5 @@ add_executable (${ProjName}
 
 target_link_libraries (${ProjName} ${Samp_LIBRARIES})
 
-add_executable (stats src/stats.cpp)
-target_link_libraries (stats ${Samp_LIBRARIES})
+#add_executable (stats src/stats.cpp)
+#target_link_libraries (stats ${Samp_LIBRARIES})

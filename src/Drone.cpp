@@ -8,7 +8,9 @@ int MyRand(int n)
 
 Drone::Drone():sensor(makeVector(0,0,3))
 {
+    //printf("hello\n");
     tree.CreateTree();
+    //printf("he\n");
     strategy = BREADTH_FIRST;
 
     sensor.TurnOnSensing(false);
@@ -337,13 +339,14 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
             PlanNode *pn = CreatePlanNode();
             pn->p = makeVector(x,y, scanHeight);
             SetExpandable(pn);
+
             pathWPs.push_back(pn);
             tree.AddChild(tree.root, pn);
+
         }
 
     }
 
-   // printf("here1\n");
 
     int lvl = 1;
     while(tree.levelNodes.find(lvl) != tree.levelNodes.end())
@@ -377,6 +380,7 @@ PlanNode * Drone::CreatePlanNode()
     PlanNode * pn = new PlanNode();
     pn->tentative = -1;
     pn->parent = NULL;
+    return pn;
 }
 
 void Drone::GoToNextWP(double step_l)
@@ -465,7 +469,7 @@ void Drone::GoToNextWP(double step_l)
     }
 }
 
-bool Drone::SetExpandable(PlanNode *pn)
+void Drone::SetExpandable(PlanNode *pn)
 {
     double dh = pn->p[2] - World::Instance()->GetMaxHeightInRect(pn->p[0], pn->p[1], sensor.GetFootprint(pn->p[2]));
     if(dh >  MAX_DIST_TO_OBSTACLES)
