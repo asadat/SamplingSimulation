@@ -15,6 +15,7 @@ using namespace std;
 
 struct Plane2D
 {
+    bool floor;
     Vector<3, double> p1; // top-left corner;
     Vector<3, double> p2; // bottom-right corner;
 
@@ -50,7 +51,7 @@ public:
     void glDraw();
 
     double GetHeight(double x, double y);
-    void InsertPlane(double x1, double y1, double z1, double x2, double y2, double z2);
+    void InsertPlane(double x1, double y1, double z1, double x2, double y2, double z2, bool floor=false);
     void InsertVisPlane(double x1, double y1, double z1, double x2, double y2, double z2);
 
     void ToggleDraw();
@@ -66,7 +67,7 @@ private:
     static World * instance;
     World();
 
-    void DrawBox(Vector<3,double> p1, Vector<3,double> p2);
+    void DrawBox(Vector<3,double> p1, Vector<3,double> p2, bool floor);
     vector<Plane2D> planes;
     vector<Plane2D> vis_planes;
 

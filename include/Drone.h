@@ -113,7 +113,7 @@ struct Tree
 class Drone:public Visualizer
 {
 public:
-    enum Traverse_Strategy {BREADTH_FIRST=0, DEPTH_FIRST, SHORTCUT_1};
+    enum Traverse_Strategy {LAWNMOWER=0, BREADTH_FIRST, DEPTH_FIRST, SHORTCUT_1, NONE};
     Drone();
     ~Drone();
 
@@ -152,11 +152,14 @@ private:
     void AddChild(PlanNode* parent, PlanNode* child);
     int SubTreeInterestingLeaves(PlanNode* root);
     void DrawCell(PlanNode *p);
+    void SortNodes(vector<PlanNode*> &list, PlanNode* p);
     FeatureTracker sensor;
 
+    bool idle;
     bool newPlan;
     bool executingPlan;
     int levels;
+    int startLevel;
     double footprint_length;
     int curLevel;
     timeval scanStartTime;

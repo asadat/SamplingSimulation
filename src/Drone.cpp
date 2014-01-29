@@ -47,6 +47,7 @@ void Drone::init(int branchingDeg, int startlvl, Traverse_Strategy st)
 {
     strategy = st;
     branching_deg = branchingDeg;
+    startLevel = startlvl;
     levels = startlvl;
     GoToLevel(levels);
     GeneratePlan();
@@ -248,8 +249,8 @@ void Drone::Update()
 void Drone::MoveSensor(TooN::Vector<3,double> dPos)
 {
     Vector<3> dp = dPos;
-    surveyLength += 2*dPos[2];
-    dPos[2] = 0;
+//    surveyLength += 2*dPos[2];
+//    dPos[2] = 0;
     surveyLength += sqrt(dPos*dPos);
 
     sensor.MoveSensor(dp);
@@ -365,6 +366,21 @@ double Drone::PathLength(vector< PlanNode* > & path)
 void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
 {
     sensor.TurnOnSensing(false);
+    if(strategy == LAWNMOWER)
+    {
+        double fh = flying_height;
+        double fp = sensor.GetFootprint(flying_height);
+        while(fh > MAX_DIST_TO_OBSTACLES)
+        {
+            fp = fp/branching_deg;
+            fh = sensor.GetHeightWithGootprint(fp);
+        }
+
+        fh = sensor.GetHeightWithGootprint(fp*branching_deg);
+        flying_height = fh;
+    }
+
+
 
     curLevel = 1;
     double footPrint_l = sensor.GetFootprint(flying_height);
@@ -449,10 +465,38 @@ PlanNode * Drone::CreatePlanNode()
     return pn;
 }
 
+void Drone::SortNodes(vector<PlanNode *> &list, PlanNode *p)
+{
+    double maxDist = 0;
+    int idx = 0;
+    int ii = 0;
+    while(idx < list.size())
+    {
+        ii = idx;
+        for(int i=idx; i< list.size(); i++)
+        {
+            double d = sqrt((p->p-list[i]->p)*(p->p-list[i]->p));
+
+            if(maxDist < d)
+            {
+                maxDist = d;
+                ii = i;
+            }
+        }
+
+        PlanNode * tmp = list[ii];
+        list.erase(list.begin()+ii);
+        list.insert(list.begin()+idx, tmp);
+        idx++;
+    }
+
+}
+
 void Drone::MoveToGoal(double step_l)
 {
     if(!pathWPs.empty())
     {
+
         bool reachedWP = false;
         PlanNode *goalNode = pathWPs.front();
 
@@ -467,6 +511,10 @@ void Drone::MoveToGoal(double step_l)
 
         Vector<3> toWP = goalNode->p-GetPose();
         double wpd = sqrt(toWP*toWP);
+
+        //printf("%f\n",wpd);
+
+
         Vector<3> dv;
         if(wpd < step_l)
         {
@@ -482,6 +530,8 @@ void Drone::MoveToGoal(double step_l)
 
         if(reachedWP)
         {
+           // printf("at wp\n",wpd);
+
             //printf("hello\n");
             int curLvl = goalNode->depth;
             goalNode->visited = true;
@@ -491,7 +541,6 @@ void Drone::MoveToGoal(double step_l)
 
             if(!goalNode->homeNode)
             {
-
                 if(strategy == SHORTCUT_1)
                 {
                     //printf("hello\n");
@@ -507,8 +556,11 @@ void Drone::MoveToGoal(double step_l)
                             pathWPs.insert(pathWPs.begin(), goalNode);
                         }
 
+                        //printf("Before: %d\n", goalNode->children.size());
+                        SortNodes(goalNode->children, goalNode);
+
                         bool flag = false;
-                        for(int i=0; i< goalNode->children.size(); i++)
+                        for(int i=0; i<goalNode->children.size() ; i++)
                         {
                             if(goalNode->children[i]->interestingness > 0.2 && !goalNode->children[i]->visited)
                             {
@@ -531,6 +583,7 @@ void Drone::MoveToGoal(double step_l)
                                 if(!goalNode->parent->visited)
                                 {
                                     goalNode->parent->visited = true;
+                                    SortNodes(goalNode->parent->children, goalNode);
                                     for(int i=0; i< goalNode->parent->children.size(); i++)
                                     {
                                         if(goalNode->parent->children[i] != goalNode)
@@ -675,7 +728,18 @@ void Drone::MoveToGoal(double step_l)
     else
     {
         printf("%d %f\n", World::Instance()->GetNumOfIntCells(), surveyLength);
-        exit(0);
+        //exit(0);
+        strategy = (Traverse_Strategy)((char)strategy+1);
+        if(strategy == NONE)
+        {
+            exit(0);
+        }
+
+        GoToLevel(startLevel);
+        GeneratePlan();
+        ExecutePlan();
+//        idle = false;
+//        idle = true;
     }
 }
 
@@ -985,6 +1049,8 @@ void Drone::PlanForLevel(int depth)
         //already destroyed in tspoint vector
         // delete p;
     }
+
+   // printf("Done with TSP\n");
     //tspoint.clear();
 
 //    while(!nextPath.empty())

@@ -294,6 +294,10 @@ SamplingSim::SamplingSim(int argc, char **argv)
         {
             strategy = Drone::SHORTCUT_1;
         }
+        else if(strcmp(argv[i],"-lawnmower")==0)
+        {
+            strategy = Drone::LAWNMOWER;
+        }
     }
 
     world = World::Instance();
@@ -458,6 +462,12 @@ void SamplingSim::mainLoop()
 
     // run glut
     glutMainLoop();
+
+//    while(true)
+//    {
+//        idle();
+//        sleep(0.01);
+//    }
 }
 
 int main(int argc, char **argv)
