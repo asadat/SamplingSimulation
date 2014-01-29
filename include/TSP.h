@@ -43,7 +43,7 @@ class TSP: public Visualizer
         TSP(){};
         ~TSP(){};
         void glDraw(){};
-        vector<Entity*> GetShortestPath(vector<Entity* >);
+        void GetShortestPath(vector<Entity* >&, vector<Entity* >&);
         vector<Entity*> GetShortestPath_heu(vector<Entity* >);
 
     private:

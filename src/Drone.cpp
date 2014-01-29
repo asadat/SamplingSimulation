@@ -497,6 +497,7 @@ void Drone::MoveToGoal(double step_l)
     if(!pathWPs.empty())
     {
 
+
         bool reachedWP = false;
         PlanNode *goalNode = pathWPs.front();
 
@@ -510,12 +511,12 @@ void Drone::MoveToGoal(double step_l)
         }
 
         Vector<3> toWP = goalNode->p-GetPose();
+       // printf("%f %f %f %f \n",toWP[0],toWP[1],toWP[2], step_l);
+
         double wpd = sqrt(toWP*toWP);
 
-        //printf("%f\n",wpd);
-
-
         Vector<3> dv;
+
         if(wpd < step_l)
         {
             dv = toWP;
@@ -523,7 +524,8 @@ void Drone::MoveToGoal(double step_l)
         }
         else
         {
-            dv = (step_l/wpd)*toWP;
+            normalize(toWP);
+            dv = (step_l)*toWP;
         }
 
         MoveSensor(dv);
@@ -700,6 +702,7 @@ void Drone::MoveToGoal(double step_l)
                 }
                 else if(strategy == BREADTH_FIRST)
                 {
+                    //printf("here 1\n");
                     //goto next depth
                     if(pathWPs.size() == 0 && tree.levelNodes.find(curLvl+1) != tree.levelNodes.end())
                     {
@@ -727,7 +730,7 @@ void Drone::MoveToGoal(double step_l)
     }
     else
     {
-        printf("%d %f\n", World::Instance()->GetNumOfIntCells(), surveyLength);
+        printf("%d %d %f\n", strategy, World::Instance()->GetNumOfIntCells(), surveyLength);
         //exit(0);
         strategy = (Traverse_Strategy)((char)strategy+1);
         if(strategy == NONE)
@@ -955,6 +958,9 @@ void Drone::VisitWaypoint(PlanNode* node)
 
 void Drone::PlanForLevel(int depth)
 {
+    executingPlan = false;
+    printf("TSP starts\n");
+
     timeval scanEnd;
     gettimeofday(&scanEnd,NULL);
 
@@ -999,8 +1005,11 @@ void Drone::PlanForLevel(int depth)
     en->nodeIdx = -2;
 
     shortestPath.clear();
-    shortestPath = tsp.GetShortestPath(tspoint);
-    //shortestPath.push_back(en);
+    //shortestPath = tsp.GetShortestPath(tspoint);
+
+    tsp.GetShortestPath(tspoint, shortestPath);
+
+   // printf("TSP size: %d\n", shortestPath.size());
 
     for(int i=0; i<shortestPath.size();i++)
     {
@@ -1035,6 +1044,8 @@ void Drone::PlanForLevel(int depth)
         }
     }
 
+   // printf("Done with TSP 1\n");
+
     while(!tspoint.empty())
     {
         Entity * p = tspoint.back();
@@ -1050,7 +1061,9 @@ void Drone::PlanForLevel(int depth)
         // delete p;
     }
 
-   // printf("Done with TSP\n");
+    printf("Done with TSP\n");
+    executingPlan = true;
+
     //tspoint.clear();
 
 //    while(!nextPath.empty())

@@ -103,7 +103,7 @@ void World::PopulateWorld(int int_cells)
 
 
         z = /*RAND(0.5, 1) **/ WORLD_MAX_HEIGHT;
-        if(true || GetHeight(x,y)<= 0.0001)
+        if(GetHeight(x,y)<= 0.0001)
         {
             ii++;
             InsertPlane(x-lx + 0.1, y+ly - 0.1, z, x+lx - 0.1, y-ly + 0.1, z);

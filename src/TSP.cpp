@@ -94,9 +94,10 @@ vector<Entity* > TSP::GetShortestPath_heu(vector<Entity* > to_visit)
     return result;
 }
 
-vector<Entity* > TSP::GetShortestPath(vector<Entity* > to_visit)
+void TSP::GetShortestPath(vector<Entity* > &to_visit, vector<Entity* >& tsplist)
 {
-    std::vector< Entity* > ent_in_order;
+    //return to_visit;
+   // std::vector< Entity* > ent_in_order;
     vector<Vertex> shortest_path_vect;
     VertexListGraph g( to_visit.size());
     WeightMap weight_map(get(edge_weight, g));
@@ -117,18 +118,20 @@ vector<Entity* > TSP::GetShortestPath(vector<Entity* > to_visit)
     //begin()+1 excludes the first vertex and end()-1 excludes the last, since they're both the dummy vertex
     for (vector<Vertex>::iterator itr = shortest_path_vect.begin(); itr != shortest_path_vect.end()-1; ++itr)
     {
-        ent_in_order.push_back( verts_to_ent[*itr] );
+        tsplist.push_back( verts_to_ent[*itr] );
     }
 
-    TwoOptOptimization(ent_in_order);
+    TwoOptOptimization(tsplist);
     //TwoOptOptimization(ent_in_order);
     //TwoOptOptimization(ent_in_order);
     //TwoOptOptimization(ent_in_order);
-    return ent_in_order;
 
+//    for(int i=0; i<ent_in_order.size(); i++)
+//    {
+//        to_visit.push_back(ent_in_order[i]);
+//    }
 
-
-
+    //return ent_in_order;
 }
 
 void TSP::TwoOptOptimization(vector<Entity *> &path)

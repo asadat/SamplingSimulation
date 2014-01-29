@@ -26,6 +26,7 @@ link_directories("/usr/lib")
 set(Samp_LIBRARIES GL GLU glut gmp CGAL CGAL_Core)
 
 SET(GCC_CGAL_COMPILE_FLAGS "-frounding-math")
+#SET(GCC_CGAL_COMPILE_FLAGS "-fp-model-strict")
 
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_CGAL_COMPILE_FLAGS}" )
 

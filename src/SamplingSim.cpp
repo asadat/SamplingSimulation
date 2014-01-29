@@ -256,7 +256,7 @@ SamplingSim::SamplingSim(int argc, char **argv)
 {
     int bdeg=2;
     int speed=2000;
-    int int_cells=100;
+    int int_cells=2;
     int startlvl=2;
     Drone::Traverse_Strategy strategy = Drone::BREADTH_FIRST;
 

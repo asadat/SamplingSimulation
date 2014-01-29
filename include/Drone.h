@@ -113,7 +113,7 @@ struct Tree
 class Drone:public Visualizer
 {
 public:
-    enum Traverse_Strategy {LAWNMOWER=0, BREADTH_FIRST, DEPTH_FIRST, SHORTCUT_1, NONE};
+    enum Traverse_Strategy {BREADTH_FIRST=0, DEPTH_FIRST, SHORTCUT_1, LAWNMOWER, NONE};
     Drone();
     ~Drone();
 
