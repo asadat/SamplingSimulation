@@ -51,6 +51,8 @@ public:
 
     double GetHeight(double x, double y);
     void InsertPlane(double x1, double y1, double z1, double x2, double y2, double z2);
+    void InsertVisPlane(double x1, double y1, double z1, double x2, double y2, double z2);
+
     void ToggleDraw();
     void PopulateWorld(int int_cells=-1);
     double GetWidth();
@@ -66,6 +68,8 @@ private:
 
     void DrawBox(Vector<3,double> p1, Vector<3,double> p2);
     vector<Plane2D> planes;
+    vector<Plane2D> vis_planes;
+
 
     bool bDrawGhost;
     bool bDraw;

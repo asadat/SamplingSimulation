@@ -61,7 +61,7 @@ FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
 
 void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
 {
-    glColor3f(1,0,0);
+    glColor3f(0,1,0);
     glPointSize(10);
     glBegin(GL_POINTS);
     glVertex3f(camp[0], camp[1], camp[2]);

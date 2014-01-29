@@ -78,7 +78,11 @@ void Drone::glDraw()
     for(int i=0; i<pathWPs.size(); i++)
     {
        // DrawFrustum(pathWPs[i], pathWPs[i][2]);
-        glColor3f(1,1,1);
+        if(pathWPs[i]->tentative == 1)
+            glColor3f(1,0,0);
+        else
+            glColor3f(1,1,1);
+
         glPointSize(10);
         glBegin(GL_POINTS);
         glVertex3f(pathWPs[i]->p[0], pathWPs[i]->p[1], pathWPs[i]->p[2]);
@@ -128,13 +132,71 @@ void Drone::glDraw()
 //        }
 //    }
 
-    if(!pathWPs.empty())
-    {
-        Vector<3> wpp = pathWPs.front()->p;
-        double ftl = sensor.GetFootprint(wpp[2]);
+    DrawCell(pathWPs.front());
+//    if(!pathWPs.empty())
+//    {
+//        Vector<3> wpp = pathWPs.front()->p;
+//        double ftl = sensor.GetFootprint(wpp[2]);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glColor4f(0.6,0,1,0.2);
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+//        if( pathWPs.front()->children.empty())
+//        {
+//            glColor4f(0.6,0,1,0.2);
+//            double h = 0.01;
+//            glBegin(GL_POLYGON);
+//            glVertex3f(wpp[0]-ftl/2, wpp[1]-ftl/2, h);
+//            glVertex3f(wpp[0]+ftl/2, wpp[1]-ftl/2, h);
+//            glVertex3f(wpp[0]+ftl/2, wpp[1]+ftl/2, h);
+//            glVertex3f(wpp[0]-ftl/2, wpp[1]+ftl/2, h);
+//            glVertex3f(wpp[0]-ftl/2, wpp[1]-ftl/2, h);
+//            glEnd();
+//        }
+//        else
+//        {
+
+
+
+//        }
+//    }
+
+}
+
+void Drone::DrawCell(PlanNode *p)
+{
+    Vector<3> wpp = p->p;
+    double ftl = sensor.GetFootprint(wpp[2]);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    if(!p->children.empty())
+    {
+        for(int i=0; i< p->children.size(); i++)
+        {
+            Vector<3> wpp1 = p->children[i]->p;
+            double ftl1 = sensor.GetFootprint(wpp1[2]);
+
+            if(p->children[i]->interestingness > 0.2)
+              glColor4f(0.1,0,1,0.2);
+            else
+              glColor4f(0.9,0.3,1,0.2);
+
+            double h = 0.01;
+            glBegin(GL_POLYGON);
+            glVertex3f(wpp1[0]-ftl1/2, wpp1[1]-ftl1/2, h);
+            glVertex3f(wpp1[0]+ftl1/2, wpp1[1]-ftl1/2, h);
+            glVertex3f(wpp1[0]+ftl1/2, wpp1[1]+ftl1/2, h);
+            glVertex3f(wpp1[0]-ftl1/2, wpp1[1]+ftl1/2, h);
+            glVertex3f(wpp1[0]-ftl1/2, wpp1[1]-ftl1/2, h);
+            glEnd();
+        }
+    }
+    else
+    {
+        if(p->interestingness > 0.2)
+          glColor4f(0.1,0,1,0.2);
+        else
+          glColor4f(0.9,0.3,1,0.2);
 
         double h = 0.01;
         glBegin(GL_POLYGON);
@@ -145,7 +207,6 @@ void Drone::glDraw()
         glVertex3f(wpp[0]-ftl/2, wpp[1]-ftl/2, h);
         glEnd();
     }
-
 }
 
 void Drone::Update()
@@ -176,7 +237,8 @@ void Drone::Update()
         elapsedTime = (-last_time.tv_sec + seconds.tv_sec) * 1000.0;      // sec to ms
         elapsedTime += (-last_time.tv_usec + seconds.tv_usec) / 1000.0;   // us to ms
 
-        GoToNextWP(speed*(elapsedTime/1000.0));
+
+        MoveToGoal(speed*(elapsedTime/1000.0));
 
         last_time = seconds;
 
@@ -185,8 +247,12 @@ void Drone::Update()
 
 void Drone::MoveSensor(TooN::Vector<3,double> dPos)
 {
+    Vector<3> dp = dPos;
+    surveyLength += 2*dPos[2];
+    dPos[2] = 0;
     surveyLength += sqrt(dPos*dPos);
-    sensor.MoveSensor(dPos);
+
+    sensor.MoveSensor(dp);
 }
 
 Vector<3> Drone::GetPose()
@@ -383,7 +449,7 @@ PlanNode * Drone::CreatePlanNode()
     return pn;
 }
 
-void Drone::GoToNextWP(double step_l)
+void Drone::MoveToGoal(double step_l)
 {
     if(!pathWPs.empty())
     {
@@ -418,47 +484,191 @@ void Drone::GoToNextWP(double step_l)
         {
             //printf("hello\n");
             int curLvl = goalNode->depth;
+            goalNode->visited = true;
             //delete the reached node
             pathWPs.erase(pathWPs.begin());
             //VisitWaypoint(goalNode);
 
-
-            if(pathWPs.size() == 0)
+            if(!goalNode->homeNode)
             {
-                //goto next depth
-                if(strategy == BREADTH_FIRST && tree.levelNodes.find(curLvl+1) != tree.levelNodes.end() /*&& !nextPath.empty()*/)
-                {
-                    //delete the home node
-                    //delete pathWPs[0];
-                    //pathWPs.clear();
 
-                    PlanForLevel(curLvl+1);
-                }
-                else //go back to home position
+                if(strategy == SHORTCUT_1)
                 {
+                    //printf("hello\n");
+
+                    // visit the children (if any)
+                    if(!goalNode->children.empty())
+                    {
+                        //printf("hello1\n");
+
+                        // save the current node if it is tentative
+                        if(goalNode->tentative == 1)
+                        {
+                            pathWPs.insert(pathWPs.begin(), goalNode);
+                        }
+
+                        bool flag = false;
+                        for(int i=0; i< goalNode->children.size(); i++)
+                        {
+                            if(goalNode->children[i]->interestingness > 0.2 && !goalNode->children[i]->visited)
+                            {
+                                flag = true;
+                                pathWPs.insert(pathWPs.begin(), goalNode->children[i]);
+                            }
+                        }
+
+                        if(!flag && goalNode->tentative == 1)
+                                pathWPs.erase(pathWPs.begin());
+                    }
+                    else
+                    {
+                        bool more_children = false;
+                        // reached a tentative node
+                        if(goalNode->tentative == 1)
+                        {
+                            if(SubTreeInterestingLeaves(goalNode) >= 1)
+                            {
+                                if(!goalNode->parent->visited)
+                                {
+                                    goalNode->parent->visited = true;
+                                    for(int i=0; i< goalNode->parent->children.size(); i++)
+                                    {
+                                        if(goalNode->parent->children[i] != goalNode)
+                                        {
+                                            more_children = true;
+                                            pathWPs.insert(pathWPs.begin(), goalNode->parent->children[i]);
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                pathWPs.front()->mustVisit = true;
+                                //assert(pathWPs.front() == goalNode->parent);
+                            }
+                        }
+
+                        if(goalNode->tentative != 1 || !more_children)
+                        {
+                            if(!pathWPs.empty())
+                            {
+                                if(pathWPs.front()->tentative == 1 && pathWPs.front()->visited)
+                                {
+                                    bool flagg= false;
+                                    //printf("1\n");
+                                    while(!flagg && !pathWPs.empty())
+                                    {
+                                        PlanNode *parent =  pathWPs.front();
+
+                                        PlanNode *grandparent = NULL;
+                                        if(pathWPs.size() >=2)
+                                        {
+                                            grandparent = pathWPs[1];
+                                        }
+
+                                        pathWPs.erase(pathWPs.begin());
+
+                                        //assert(parent == goalNode->parent);
+                                       // printf("3\n");
+                                        if(grandparent != NULL)
+                                        {
+                                            if(!grandparent->visited && grandparent->tentative==1 && SubTreeInterestingLeaves(parent) >= 1)
+                                            {
+                                               // printf("4\n");
+
+                                                grandparent->visited = true;
+                                                for(int i=0; i< grandparent->children.size(); i++)
+                                                {
+                                                    if(grandparent->children[i] != parent && !grandparent->children[i]->visited)
+                                                    {
+                                                        pathWPs.insert(pathWPs.begin(), grandparent->children[i]);
+                                                        flagg = true;
+                                                    }
+                                                }
+                                               // printf("5\n");
+
+                                            }
+                                            else if(!grandparent->visited && grandparent->tentative==1 && SubTreeInterestingLeaves(parent) < 1)
+                                            {
+                                                //printf("6\n");
+
+                                                grandparent->mustVisit = true;
+                                                flagg = true;
+                                                //printf("7\n");
+
+
+                                            }
+                                            else
+                                            {
+                                                //printf("8\n");
+
+                                                if(grandparent->tentative != 1)
+                                                {
+                                                    flagg = true;
+                                                }
+
+                                                //printf("hello!! %d %d %d\n", grandparent->visited, grandparent->tentative, SubTreeInterestingLeaves(parent));
+                                                //exit(0);
+                                                //printf("9\n");
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            flagg = true;
+                                        }
+                                    }
+                                    //printf("2\n");
+                                }
+                            }
+                        }
+
+                        if(pathWPs.front()->depth < goalNode->depth && !pathWPs.front()->mustVisit)
+                        {
+                            //printf("Detected a possible shortcut %d-%d from: %f %f\n",pathWPs.front()->depth, goalNode->depth,  goalNode->p[0], goalNode->p[1]);
+
+                            PlanNode * newTarget = pathWPs.front();
+                            newTarget->tentative = 1;
+                            MakeShortcutPlan(goalNode, newTarget);
+                        }
+
+                    }
+
+
+
+                }
+                else if(strategy == DEPTH_FIRST)
+                {
+                    for(int i=0; i< goalNode->children.size(); i++)
+                    {
+                        if(goalNode->children[i]->interestingness > 0.2)
+                            pathWPs.insert(pathWPs.begin(), goalNode->children[i]);
+                    }
+                }
+                else if(strategy == BREADTH_FIRST)
+                {
+                    //goto next depth
+                    if(pathWPs.size() == 0 && tree.levelNodes.find(curLvl+1) != tree.levelNodes.end())
+                    {
+                        PlanForLevel(curLvl+1);
+                    }
+                }
+
+                if(pathWPs.size() == 0) //go back to home position
+                {
+                    //printf("go back to home position\n");
+
                     PlanNode * home = CreatePlanNode();
                     home->p = homePos;
                     home->homeNode = true;
+                    home->depth = curLvl;
                     pathWPs.push_back(home);
 
                     sensor.TurnOnSensing(false);
                     pathWPs[0]->p[2] = GetPose()[2];
                 }
+
             }
-//            else if(strategy == SHORTCUT_1)
-//            {
-//                if(curLvl > pathWPs[0]->depth)
-//                {
-//                    PlanNode *nextp = pathWPs.front();
-//                    pathWPs.erase(pathWPs.begin());
-//                    GenerateSubtree(nextp, curLvl-nextp->depth);
-
-//                    delete nextp;
-//                }
-//            }
-
-            //delete goalNode;
-
             //printf("hi\n");
         }
     }
@@ -480,6 +690,89 @@ void Drone::SetExpandable(PlanNode *pn)
     else
         pn->expandable = false;
 
+}
+int Drone::SubTreeInterestingLeaves(PlanNode *root)
+{
+    if(root->children.empty())
+    {
+        if(root->interestingness > 0.2)
+            return 1;
+        else
+            return 0;
+    }
+    else
+    {
+        int n = 0;
+        for(int i=0; i<root->children.size(); i++)
+        {
+            n += SubTreeInterestingLeaves(root->children[i]);
+        }
+
+        return n;
+    }
+}
+
+PlanNode * Drone::FindClosestChild(PlanNode *parent, PlanNode *pn)
+{
+    if(parent->depth >= pn->depth || parent->children.empty())
+    {
+        //printf("no close children!!\n");
+        return NULL;
+    }
+    else
+    {
+        int idx = -1;
+        double minDist = 99999999999;
+        for(int i=0; i<parent->children.size(); i++)
+        {
+            Vector<3> dp = parent->children[i]->p - pn->p;
+            dp[2] = 0;
+
+            if(dp*dp < minDist)
+            {
+                idx = i;
+                minDist = dp*dp;
+            }
+        }
+
+        return  parent->children[idx];
+    }
+//        int idx = -1;
+//        double minDist = 99999999999;
+//        for(int i=0; i<parent->children.size(); i++)
+//        {
+//            Vector<3> dp = parent->children[i]->p - pn->p;
+//            dp[2] = 0;
+
+//            if(dp*dp < minDist)
+//            {
+//                idx = i;
+//                minDist = dp*dp;
+//            }
+//        }
+
+//        if(parent->depth+1 == pn->depth)
+//        {
+//            return  parent->children[idx];
+//        }
+//        else
+//            return FindClosestChild(parent->children[idx],pn);
+//    }
+}
+
+void Drone::MakeShortcutPlan(PlanNode *bottomNode, PlanNode *topNode)
+{
+    PlanNode* p = FindClosestChild(topNode, bottomNode);
+    assert(p!=NULL);
+
+    while(p != NULL)
+    {
+       // printf("next close children!!\n");
+
+        p->tentative = 1;
+        pathWPs.insert(pathWPs.begin(), p);
+        p = FindClosestChild(p, bottomNode);
+    }
 }
 
 void Drone::GenerateSubtree(PlanNode *node, int tree_depth)
@@ -505,7 +798,7 @@ void Drone::GenerateSubtree(PlanNode *node, int tree_depth)
         for(int j=0; j<child_n; j++)
         {
             tmp = CreatePlanNode();
-            tmp->tentative = 1;
+            tmp->tentative = -1;
             tmp->p = makeVector(xx + i*next_fp, yy + j*next_fp, zz);
             double dh = tmp->p[2] - World::Instance()->GetMaxHeightInRect(tmp->p[0], tmp->p[1], sensor.GetFootprint(tmp->p[2]));
             if(dh <  MAX_DIST_TO_OBSTACLES)
@@ -604,10 +897,13 @@ void Drone::PlanForLevel(int depth)
     double totalTime = (-scanStartTime.tv_sec + scanEnd.tv_sec);      // sec to ms
     totalTime += (-scanStartTime.tv_usec + scanEnd.tv_usec) / 1000000.0;   // us to ms
 
-//    if(nextPath.empty())
-//    {
-//        return;
-//    }
+    vector<PlanNode*> &nlnds = tree.levelNodes[depth];
+   // printf("hello %d %d %d\n", depth, nlnds.size(), tree.levelNodes.size());
+
+    if(nlnds.empty())
+    {
+        return;
+    }
 
     sensor.ResetInterestingness();
     curLevel++;
@@ -620,7 +916,6 @@ void Drone::PlanForLevel(int depth)
     en->nodeIdx = -1;
     tspoint.push_back(en);
 
-    vector<PlanNode*> &nlnds = tree.levelNodes[depth];
     for(int i=0; i<nlnds.size();i++)
     {
         if(nlnds[i]->interestingness > 0.2)

@@ -4,7 +4,7 @@
 #include "World.h"
 #include "TSP.h"
 
-#define     MAX_DIST_TO_OBSTACLES   1
+#define     MAX_DIST_TO_OBSTACLES   1.5
 
 using namespace TooN;
 using namespace std;
@@ -19,6 +19,7 @@ struct PlanNode
     bool expandable;
     bool homeNode;
 
+    bool mustVisit;
     int depth;
     int tentative;
     bool observationHeightFixed;
@@ -46,7 +47,7 @@ struct Tree
         {
             vector<PlanNode*> &nds = levelNodes[i];
             glColor3f(0,0,0);
-            glLineWidth(5);
+            glLineWidth(1);
             glBegin(GL_LINES);
             for(int j=0; j<nds.size(); j++)
             {
@@ -133,13 +134,15 @@ public:
     void ExecutePlan();
     void DestroyPlan();
 
-    void GoToNextWP(double step_l);
+    void MoveToGoal(double step_l);
     void ChangeSpeed(double ds);
 
     static PlanNode * CreatePlanNode();
     double speed;
 
 private:
+    PlanNode * FindClosestChild(PlanNode* parent, PlanNode* pn);
+    void MakeShortcutPlan(PlanNode *bottomNode, PlanNode *topNode);
     void GenerateSubtree(PlanNode * root, int tree_depth);
     void SetExpandable(PlanNode *pn);
     void VisitWaypoint(PlanNode *node);
@@ -147,6 +150,8 @@ private:
     void PlanForLevel(int depth);
     double PathLength(vector< PlanNode* > & path);
     void AddChild(PlanNode* parent, PlanNode* child);
+    int SubTreeInterestingLeaves(PlanNode* root);
+    void DrawCell(PlanNode *p);
     FeatureTracker sensor;
 
     bool newPlan;

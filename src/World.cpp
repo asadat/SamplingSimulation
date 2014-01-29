@@ -7,7 +7,7 @@
 #define WORLD_WIDTH     64
 #define WORLD_LENGTH    64
 #define WORLD_MAX_HEIGHT    0.1
-#define OBS_MAX_LENGHT  1
+#define OBS_MAX_LENGHT  2
 
 World* World::instance = NULL;
 
@@ -57,7 +57,8 @@ void World::PopulateWorld(int int_cells)
     planes.clear();
     bDraw = true;
 
-    srand(time(NULL));
+   // srand(time(NULL));
+     srand(63);
 
     double worldW = WORLD_WIDTH;
     double worldL = WORLD_LENGTH;
@@ -72,19 +73,40 @@ void World::PopulateWorld(int int_cells)
     int ii=0;
     while(ii<n)
     {
+        double clusterSize = 10;
         double x,y,z;
         double lx,ly;
+        double rnd = RAND(0,1);
         lx = maxL;//RAND(0.2* maxL, 0.5* maxL);
         ly = maxL;//RAND(0.2* maxL, 0.5* maxL);
-        x = RAND((-worldW/2+lx),(worldW/2-lx));
-        y = RAND((-worldL/2+ly),(worldL/2-ly));
-        x = floor(x);
-        y = floor(y);
+
+        if(rnd<1 && planes.size() > n/50)
+        {
+            double xx,yy;
+            int idx = RAND(0,1)*(planes.size()-1);
+            xx = (planes[idx].p1[0]+planes[idx].p2[0])/2;
+            yy = (planes[idx].p1[1]+planes[idx].p2[1])/2;
+
+            x = xx + RAND((-clusterSize/2+lx),(clusterSize/2-lx));
+            y = yy + RAND((-clusterSize/2+ly),(clusterSize/2-ly));
+            x = floor(x);
+            y = floor(y);
+        }
+        else
+        {
+            x = RAND((-worldW/2+lx),(worldW/2-lx));
+            y = RAND((-worldL/2+ly),(worldL/2-ly));
+            x = floor(x);
+            y = floor(y);
+        }
+
+
+
         z = /*RAND(0.5, 1) **/ WORLD_MAX_HEIGHT;
         if(GetHeight(x,y)<= 0.0001)
         {
             ii++;
-            InsertPlane(x-lx, y+ly, z, x+lx, y-ly, z);
+            InsertPlane(x-lx + 0.1, y+ly - 0.1, z, x+lx - 0.1, y-ly + 0.1, z);
         }
     }
 
@@ -308,6 +330,13 @@ void World::glDraw()
         Vector<3, double> p2 = planes[i].p2;
         DrawBox(p1,p2);
     }
+
+    for(int i=0 ; i<vis_planes.size(); i++)
+    {
+        Vector<3, double> p1 = planes[i].p1;
+        Vector<3, double> p2 = planes[i].p2;
+        DrawBox(p1,p2);
+    }
 }
 
 double World::GetHeight(double x, double y)
@@ -336,6 +365,20 @@ void World::InsertPlane(double x1, double y1, double z1, double x2, double y2, d
     plane.p2[2] = z2;
 
     planes.push_back(plane);
+}
+
+void World::InsertVisPlane(double x1, double y1, double z1, double x2, double y2, double z2)
+{
+    Plane2D plane;
+    plane.p1[0] = x1;
+    plane.p1[1] = y1;
+    plane.p1[2] = z1;
+
+    plane.p2[0] = x2;
+    plane.p2[1] = y2;
+    plane.p2[2] = z2;
+
+    vis_planes.push_back(plane);
 }
 
 void World::ToggleDraw()
