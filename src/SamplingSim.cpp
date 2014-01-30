@@ -258,11 +258,16 @@ SamplingSim::SamplingSim(int argc, char **argv)
     int speed=2000;
     int int_cells=2;
     int startlvl=2;
+    int interesting_per = 20;
     Drone::Traverse_Strategy strategy = Drone::BREADTH_FIRST;
 
     for(int i=1; i<argc;i++)
     {
-        if(strcmp(argv[i],"-b")==0)
+        if(strcmp(argv[i],"-i")==0)
+        {
+            interesting_per = atoi(argv[++i]);
+        }
+        else if(strcmp(argv[i],"-b")==0)
         {
             bdeg = atoi(argv[++i]);
         }
@@ -303,7 +308,7 @@ SamplingSim::SamplingSim(int argc, char **argv)
     world = World::Instance();
     glutInit(&argc, argv);
 
-    world->PopulateWorld(int_cells);
+    world->PopulateWorld(interesting_per, int_cells);
 
     drone.speed = speed;
     drone.init(bdeg, startlvl, strategy);
@@ -320,7 +325,7 @@ void SamplingSim::hanldeKeyPressed(std::map<unsigned char, bool> &key, bool &upd
 
     if(key['`'])
     {
-        world->PopulateWorld();
+        world->PopulateWorld(20);
     }
 
     if(key[']'])

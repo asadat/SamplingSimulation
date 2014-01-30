@@ -55,7 +55,7 @@ public:
     void InsertVisPlane(double x1, double y1, double z1, double x2, double y2, double z2);
 
     void ToggleDraw();
-    void PopulateWorld(int int_cells=-1);
+    void PopulateWorld(int int_per, int int_cells=-1);
     double GetWidth();
     double GetLength();
     double GetMaxHeight();
@@ -76,6 +76,7 @@ private:
     bool bDraw;
     MeshCreator mesh;
     int inter_cells_n;
+    int inter_perc;
 
 
 };

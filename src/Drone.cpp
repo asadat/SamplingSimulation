@@ -497,6 +497,20 @@ void Drone::MoveToGoal(double step_l)
     if(!pathWPs.empty())
     {
 
+//        bool tflag = false;
+
+//        if(strategy == BREADTH_FIRST)
+//        {
+//            timeval seconds;
+//            gettimeofday(&seconds, NULL);
+//            //printf("seconds: %f /n", seconds);
+
+//            double elapsedTime = (-last_time.tv_sec + seconds.tv_sec) * 1000.0;      // sec to ms
+//            elapsedTime += (-last_time.tv_usec + seconds.tv_usec) / 1000.0;   // us to ms
+
+//            if(elapsedTime/1000.0 < 0.2)
+//               tflag = true;
+//        }
 
         bool reachedWP = false;
         PlanNode *goalNode = pathWPs.front();
@@ -504,14 +518,15 @@ void Drone::MoveToGoal(double step_l)
         //fix the observation height; one time for each node
         if(!goalNode->observationHeightFixed)
         {
-            double obsHeight = World::Instance()->GetMaxHeightInRect(goalNode->p[0],goalNode->p[1],sensor.GetFootprint(goalNode->p[2]));
+            double obsHeight = World::Instance()->GetMaxHeightInRect(goalNode->p[0], goalNode->p[1], sensor.GetFootprint(goalNode->p[2]));
             if(goalNode->p[2] - obsHeight < MAX_DIST_TO_OBSTACLES)
                 goalNode->p[2] = obsHeight + MAX_DIST_TO_OBSTACLES;
             goalNode->observationHeightFixed = true;
         }
 
         Vector<3> toWP = goalNode->p-GetPose();
-       // printf("%f %f %f %f \n",toWP[0],toWP[1],toWP[2], step_l);
+//        if(tflag)
+//            printf("%f %f %f %f \n",toWP[0],toWP[1],toWP[2], step_l);
 
         double wpd = sqrt(toWP*toWP);
 
@@ -730,7 +745,19 @@ void Drone::MoveToGoal(double step_l)
     }
     else
     {
-        printf("%d %d %f\n", strategy, World::Instance()->GetNumOfIntCells(), surveyLength);
+        char sc=0;
+        if(strategy == BREADTH_FIRST)
+            sc = 'B';
+        else if(strategy == DEPTH_FIRST)
+            sc = 'D';
+        else if(strategy == SHORTCUT_1)
+            sc = 'S';
+        else if(strategy == LAWNMOWER)
+            sc = 'L';
+        else
+            sc = '-';
+
+        printf("%c %d %d %f\n", sc, strategy, World::Instance()->GetNumOfIntCells(), surveyLength);
         //exit(0);
         strategy = (Traverse_Strategy)((char)strategy+1);
         if(strategy == NONE)
@@ -959,7 +986,7 @@ void Drone::VisitWaypoint(PlanNode* node)
 void Drone::PlanForLevel(int depth)
 {
     executingPlan = false;
-    printf("TSP starts\n");
+    //printf("TSP starts\n");
 
     timeval scanEnd;
     gettimeofday(&scanEnd,NULL);
@@ -1038,9 +1065,9 @@ void Drone::PlanForLevel(int depth)
         }
         if(shortestPath[i]->nodeIdx == -1) // the start node (current position)
         {
-            PlanNode* pn= CreatePlanNode();
-            pn->p = GetPose();
-            pathWPs.push_back(pn);
+//            PlanNode* pn= CreatePlanNode();
+//            pn->p = GetPose();
+//            pathWPs.push_back(pn);
         }
     }
 
@@ -1061,8 +1088,10 @@ void Drone::PlanForLevel(int depth)
         // delete p;
     }
 
-    printf("Done with TSP\n");
+    //printf("Done with TSP\n");
     executingPlan = true;
+
+    gettimeofday(&last_time, NULL);
 
     //tspoint.clear();
 

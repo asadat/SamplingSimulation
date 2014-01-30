@@ -1,3 +1,6 @@
+#ifndef DRONE_
+#define DRONE_
+
 #include "Visualizer.h"
 #include "FeatureTracker.h"
 #include "TooN/TooN.h"
@@ -5,6 +8,20 @@
 #include "TSP.h"
 
 #define     MAX_DIST_TO_OBSTACLES   1.5
+
+//std::string strategy_name_str(int idx)
+//{
+//    if(idx==0)
+//        return "BreadthFirst";
+//    else if(idx==1)
+//        return "DepthFirst";
+//    else if(idx==2)
+//        return "Shortcut";
+//    else if(idx==3)
+//        return "Lawnmower";
+//    else
+//        return "none";
+//}
 
 using namespace TooN;
 using namespace std;
@@ -155,6 +172,8 @@ private:
     void SortNodes(vector<PlanNode*> &list, PlanNode* p);
     FeatureTracker sensor;
 
+    timeval last_time;
+
     bool idle;
     bool newPlan;
     bool executingPlan;
@@ -179,3 +198,5 @@ private:
     double surveyLength;
 
 };
+
+#endif

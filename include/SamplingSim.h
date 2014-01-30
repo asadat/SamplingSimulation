@@ -1,3 +1,6 @@
+#ifndef _SAMPLINGSIM
+#define _SAMPLINGSIM
+
 #include <stdio.h>
 #include "World.h"
 #include "Drone.h"
@@ -32,3 +35,5 @@ private:
     Drone drone;
 
 };
+
+#endif

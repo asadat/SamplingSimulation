@@ -7,7 +7,7 @@
 #define WORLD_WIDTH     128
 #define WORLD_LENGTH    128
 #define WORLD_MAX_HEIGHT    0.1
-#define OBS_MAX_LENGHT  20
+#define OBS_MAX_LENGHT  30
 
 World* World::instance = NULL;
 
@@ -15,10 +15,12 @@ World::World():Visualizer()
 {
     //RegisterGlDrawing();
     bDrawGhost = false;
+    inter_perc = 20;
     inter_cells_n = WORLD_WIDTH*WORLD_LENGTH/200;}
 
-void World::PopulateWorld(int int_cells)
+void World::PopulateWorld(int inte_per, int int_cells)
 {
+    inter_perc = inte_per;
     if(int_cells >0)
         inter_cells_n = int_cells;
 
@@ -66,13 +68,18 @@ void World::PopulateWorld(int int_cells)
 
 
     int n = inter_cells_n;
-    double maxL = OBS_MAX_LENGHT;
+    //double maxL = OBS_MAX_LENGHT;
+    double maxL = sqrt((((double)inter_perc)/100.0)*WORLD_WIDTH*WORLD_LENGTH/int_cells);
 
-    InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0, true);
+    //printf("====== %f\n", maxL);
 
-    int ii=0;
-    while(ii<n)
+
+
+    int trials = 0;
+    //int ii=0;
+    while(planes.size() < n)
     {
+        trials++;
         double clusterSize = 20;
         double x,y,z;
         double lx,ly;
@@ -94,8 +101,8 @@ void World::PopulateWorld(int int_cells)
         }
         else
         {
-            x = RAND((-worldW/2+lx),(worldW/2-lx));
-            y = RAND((-worldL/2+ly),(worldL/2-ly));
+            x = RAND((-worldW/2+lx/2),(worldW/2-lx/2));
+            y = RAND((-worldL/2+ly/2),(worldL/2-ly/2));
             x = floor(x);
             y = floor(y);
         }
@@ -103,16 +110,24 @@ void World::PopulateWorld(int int_cells)
 
 
         z = /*RAND(0.5, 1) **/ WORLD_MAX_HEIGHT;
-        if(GetHeight(x,y)<= 0.0001)
+        if(GetMaxHeightInRect(x,y,maxL)<= 0.05)
         {
-            ii++;
-            InsertPlane(x-lx + 0.1, y+ly - 0.1, z, x+lx - 0.1, y-ly + 0.1, z);
+            //ii++;
+            InsertPlane(x-lx/2 + 0.1, y+ly/2 - 0.1, z, x+lx/2 - 0.1, y-ly/2 + 0.1, z);
         }
         else
         {
+            if(trials > 500)
+            {
+                trials=0;
+                planes.clear();
+            }
             //printf("%f, %f\n", x,y);
         }
     }
+
+    InsertPlane(-worldW/2, worldL/2, 0, worldW/2, -worldL/2, 0, true);
+
 
 }
 
@@ -415,8 +430,8 @@ double World::GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, dou
 double World::GetMaxHeightInRect(double x, double y, double footprint_l)
 {
     double mxheight=0;
-    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=0.9 /*BS_MAX_LENGHT*/)
-        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=0.9 /*OBS_MAX_LENGHT*/)
+    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=0.2 /*BS_MAX_LENGHT*/)
+        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=0.2 /*OBS_MAX_LENGHT*/)
         {
             double h = GetHeight(i,j);
             mxheight = (mxheight < h)?h:mxheight;

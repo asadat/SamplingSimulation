@@ -48,5 +48,5 @@ add_executable (${ProjName}
 
 target_link_libraries (${ProjName} ${Samp_LIBRARIES})
 
-#add_executable (stats src/stats.cpp)
-#target_link_libraries (stats ${Samp_LIBRARIES})
+add_executable (stats src/stats.cpp)
+target_link_libraries (stats ${Samp_LIBRARIES})
