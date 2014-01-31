@@ -62,7 +62,10 @@ public:
     double GetMaxHeightInRect(double x, double y, double footprint_l);
     double GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
     int GetNumOfIntCells(){return inter_cells_n;}
+    int GetPercOfIntCells(){return inter_perc;}
+
 private:
+
 
     static World * instance;
     World();

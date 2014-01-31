@@ -757,7 +757,7 @@ void Drone::MoveToGoal(double step_l)
         else
             sc = '-';
 
-        printf("%c %d %d %f\n", sc, strategy, World::Instance()->GetNumOfIntCells(), surveyLength);
+        printf("%c %d %d %d %f\n", sc, strategy, World::Instance()->GetPercOfIntCells(), World::Instance()->GetNumOfIntCells(), surveyLength);
         //exit(0);
         strategy = (Traverse_Strategy)((char)strategy+1);
         if(strategy == NONE)

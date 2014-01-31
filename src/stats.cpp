@@ -36,38 +36,63 @@ double var(vector<double> &v)
 
 int main(int argc, char **argv)
 {
-    map<int, vector<double> > data;
+    map<int, map<int,vector<double> > > data[4];
 
     int cells_n = -1;
+    int perc = -1;
+    int strategy = -1;
     float val = 0;
+    char stra=-1;
 
     FILE * f=fopen(argv[1], "r+");
 
 
-    while(fscanf(f,"%d %f\n",&cells_n, &val) != EOF)
+    while(fscanf(f,"%c %d %d %d %f\n", &stra, &strategy, &perc, &cells_n, &val) != EOF)
     {
         if(cells_n < 0)
             break;
 
-        //printf("%d %f\n", cells_n, val);
-        if(data.find(cells_n) == data.end())
+        //printf("%c %d %d %d %f\n", stra, strategy, perc, cells_n, val);
+        if(data[strategy].find(perc) == data[strategy].end())
         {
+            map<int, vector<double> > num_val;
             vector<double> v;
             v.push_back(val);
-            data[cells_n] = v;
+            //num_val.insert(pair<int, vector<double> >(cells_n, num_val));
+            num_val[cells_n] = v;
+            data[strategy][perc] = num_val;
+            //data[cells_n] = v;
         }
         else
         {
-            data[cells_n].push_back(val);
+            //data[cells_n].push_back(val);
+            if(data[strategy][perc].find(cells_n) == data[strategy][perc].end())
+            {
+                vector<double> vals;
+                vals.push_back(val);
+                data[strategy][perc][cells_n] = vals;
+            }
+            else
+            {
+                data[strategy][perc][cells_n].push_back(val);
+            }
         }
     }
 
     fclose(f);
 
     map<int, vector<double> >::iterator it;
-    for(it = data.begin(); it!=data.end(); it++)
+    map<int, map<int,vector<double> > >::iterator itt;
+
+    for(int i=0; i<4; i++)
     {
-        printf("%d %f %f\n", it->first, mean(it->second), var(it->second));
+        for(itt = data[i].begin(); itt!=data[i].end(); itt++)
+        {
+            for(it = itt->second.begin(); it!=itt->second.end(); it++)
+            {
+                printf("%d\t%d\t%d\t%f\t%f\n", i, itt->first, it->first, mean(it->second), var(it->second));
+            }
+        }
     }
     return 0;
 }

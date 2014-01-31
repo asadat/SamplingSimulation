@@ -73,8 +73,6 @@ void World::PopulateWorld(int inte_per, int int_cells)
 
     //printf("====== %f\n", maxL);
 
-
-
     int trials = 0;
     //int ii=0;
     while(planes.size() < n)
@@ -107,9 +105,7 @@ void World::PopulateWorld(int inte_per, int int_cells)
             y = floor(y);
         }
 
-
-
-        z = /*RAND(0.5, 1) **/ WORLD_MAX_HEIGHT;
+        z = WORLD_MAX_HEIGHT;
         if(GetMaxHeightInRect(x,y,maxL)<= 0.05)
         {
             //ii++;
