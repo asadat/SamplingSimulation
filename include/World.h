@@ -6,6 +6,8 @@
 #include "TooN/TooN.h"
 #include <vector>
 #include "MeshCreator.h"
+#include "cvd/image.h"
+#include "cvd/image_io.h"
 
 #define RAND(a,b)    ((a)+((b)-(a))*((double)(rand()%1000))/1000)
 
@@ -56,6 +58,7 @@ public:
 
     void ToggleDraw();
     void PopulateWorld(int int_per, int int_cells=-1);
+    void PopulateWorldFromImage(char * imagepath);
     double GetWidth();
     double GetLength();
     double GetMaxHeight();
@@ -63,6 +66,7 @@ public:
     double GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, double> br);
     int GetNumOfIntCells(){return inter_cells_n;}
     int GetPercOfIntCells(){return inter_perc;}
+    static unsigned int textureName;
 
 private:
 
@@ -80,6 +84,7 @@ private:
     MeshCreator mesh;
     int inter_cells_n;
     int inter_perc;
+    CVD::Image<CVD::Rgb<CVD::byte> > texture_img;
 
 
 };

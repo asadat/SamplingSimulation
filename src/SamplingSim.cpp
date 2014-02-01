@@ -3,11 +3,13 @@
 #include "TooN/TooN.h"
 #include <map>
 #include "World.h"
+#include "cvd/image_io.h"
+#include "cvd/image.h"
 //#include "FeatureTracker.h"
 #include <sys/time.h>
 
 using namespace TooN;
-
+using namespace CVD;
 SamplingSim * SamplingSim::instance = NULL;
 bool visualize = true;
 
@@ -260,10 +262,18 @@ SamplingSim::SamplingSim(int argc, char **argv)
     int startlvl=2;
     int interesting_per = 20;
     Drone::Traverse_Strategy strategy = Drone::BREADTH_FIRST;
+    bool loadmap = false;
+    int mapstridx=0;
 
     for(int i=1; i<argc;i++)
     {
-        if(strcmp(argv[i],"-i")==0)
+        if(strcmp(argv[i],"-m")==0)
+        {
+            loadmap = true;
+            mapstridx = ++i;
+            //interesting_per = atoi(argv[++i]);
+        }
+        else if(strcmp(argv[i],"-i")==0)
         {
             interesting_per = atoi(argv[++i]);
         }
@@ -308,7 +318,14 @@ SamplingSim::SamplingSim(int argc, char **argv)
     world = World::Instance();
     glutInit(&argc, argv);
 
-    world->PopulateWorld(interesting_per, int_cells);
+    //printf("loading...\n");
+
+
+    if(loadmap)
+        world->PopulateWorldFromImage(argv[mapstridx]);
+    else
+        world->PopulateWorld(interesting_per, int_cells);
+
 
     drone.speed = speed;
     drone.init(bdeg, startlvl, strategy);
@@ -458,7 +475,7 @@ void SamplingSim::mainLoop()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
     // define global state
-    glDisable(GL_LIGHTING);
+    //glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
     glutIgnoreKeyRepeat(true);
 

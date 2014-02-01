@@ -16,14 +16,17 @@ SET(ProjName SamplingSimulation)
 #link_directories("/usr/local/lib")
 
 #uncomment for ubuntu
+include_directories("~/libcvd")
+
 include_directories("./include")
 include_directories("./include/tree")
 include_directories("./TooN/include")
 include_directories("/usr/include")
 link_directories("/usr/lib/x86_64-linux-gnu")
 link_directories("/usr/lib")
+link_directories("~/libcvd")
 
-set(Samp_LIBRARIES GL GLU glut gmp CGAL CGAL_Core)
+set(Samp_LIBRARIES GL GLU glut gmp CGAL CGAL_Core cvd)
 
 SET(GCC_CGAL_COMPILE_FLAGS "-frounding-math")
 #SET(GCC_CGAL_COMPILE_FLAGS "-fp-model-strict")

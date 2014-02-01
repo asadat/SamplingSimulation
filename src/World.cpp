@@ -1,60 +1,79 @@
 #include "World.h"
 #include <stdio.h>
-
+#include "cvd/image_io.h"
+#include "cvd/image.h"
 #include <cstdio>
+#include <stdio.h>
 
 #define MAX(a,b)    (a>b?a:b)
-#define WORLD_WIDTH     128
-#define WORLD_LENGTH    128
+#define WORLD_WIDTH     128.0
+#define WORLD_LENGTH    128.0
 #define WORLD_MAX_HEIGHT    0.1
 #define OBS_MAX_LENGHT  30
 
+using namespace CVD;
 World* World::instance = NULL;
+unsigned int World::textureName = 0;
 
 World::World():Visualizer()
 {
+
+    //textureName = 0;
     //RegisterGlDrawing();
     bDrawGhost = false;
     inter_perc = 20;
-    inter_cells_n = WORLD_WIDTH*WORLD_LENGTH/200;}
+    inter_cells_n = WORLD_WIDTH*WORLD_LENGTH/200;
+}
+
+void World::PopulateWorldFromImage(char * imagepath)
+{
+    planes.clear();
+    CVD::Image<CVD::Rgb<CVD::byte> > img;
+    CVD::img_load(img,imagepath);
+    CVD::ImageRef size = img.size();
+    bDraw = true;
+    double cellSize =WORLD_WIDTH/size.x;
+    int n=0;
+    //printf("Size: %d %d\n", size.x, size.y);
+    for(int i=0; i<size.x; i++)
+        for(int j=0; j<size.y; j++)
+        {
+            //printf("at: %d %d\n", i, j);
+
+            CVD::Rgb<CVD::byte> c = img[j][i];
+            //if(c.red < 100 && c.blue < 100 && c.green > 100)
+            if(c.red > 250 && c.green > 250 && c.blue <5 ||
+                    c.red < 5 && c.green > 250 && c.blue <5 ||
+                    c.red > 250 && c.green > 250 && c.blue >250)//(c.red < 150 && c.blue < 100 && c.green > 100) || (c.red > 200 && c.blue < 150 && c.green > 200))
+            {
+                n++;
+                double x1,x2,y1,y2;
+                x1 = -cellSize*size.x/2 + cellSize*i;
+                x2 = x1+cellSize;
+                y1 = cellSize*size.y/2 - cellSize*j;
+                y2 = y1-cellSize;
+                InsertPlane(x1,y1,WORLD_MAX_HEIGHT,x2,y2,WORLD_MAX_HEIGHT);
+                //printf("%f %f %f %f\n", x1, y1, x2, y2);
+            }
+        }
+
+
+    InsertPlane(-WORLD_WIDTH/2, WORLD_LENGTH/2, 0, WORLD_WIDTH/2, -WORLD_LENGTH/2, 0, true);
+
+    //char tex[100];
+    std::string s;
+    s.append(imagepath);
+    CVD::img_load(texture_img, "tex"+s);
+    //printf("finnished loading... %d cells\n", n);
+
+}
 
 void World::PopulateWorld(int inte_per, int int_cells)
 {
+    //PopulateWorldFromImage();
     inter_perc = inte_per;
     if(int_cells >0)
         inter_cells_n = int_cells;
-
-//    FILE *f = fopen("result","r+");
-//    Vector<3> p;
-//    Vector<3> orig;
-//    bool orgset = false;
-//    float x,y,z;
-//    int nn=0;
-//    while(fscanf(f,"%f %f %f\n",&x,&y,&z) != EOF)
-//    {
-//        p[0] = x;
-//        p[1] = y;
-//        p[2] = z;
-
-//        nn++;
-//        p[0] *= 2000;
-//        p[1] *= 1000;
-//        p[2] /=40;
-//        if(!orgset)
-//        {
-//            orgset = true;
-//            orig = p;
-//        }
-
-//        p= p-orig;
-//        printf("===%f\t%f\t%f\n",p[0],p[1],p[2]);
-
-//       mesh.AddVertex(p);
-//    }
-
-//    printf("====== %d\n",nn);
-
-//    fclose(f);
 
     planes.clear();
     bDraw = true;
@@ -130,8 +149,11 @@ void World::PopulateWorld(int inte_per, int int_cells)
 void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2, bool floor)
 {
 
+    glDisable(GL_TEXTURE_2D);
+
+    glColor3f(1.0f, 1.0f, 1.0f);
     //TOP
-    for(int i=0; i<2; i++)
+    for(int i=0; i<1; i++)
     {
         if(i==0)
         {
@@ -140,7 +162,6 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2, bool floor)
 //            {
 //                floor = true;
 //            }
-
             //glColor3f(0,1,0);
             if(bDrawGhost)
             {
@@ -155,10 +176,19 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2, bool floor)
                 if(floor)
                     glColor3f(233.0/255, 227.0/255, 133.0/255);
                 else
-                    glColor3f(205.0/255, 92.0/255, 92.0/255);
+                   // glColor3f(205.0/255, 92.0/255, 92.0/255);
+                     glColor3f(95.0/255, 252.0/255, 92.0/255);
             }
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            if(floor/* && textureName != 0*/)
+            {
+                //printf("hi\n");
+//                glColor3f(1,1,1);
+//                glEnable(GL_TEXTURE_2D);
+//                glBindTexture(GL_TEXTURE_2D, textureName);
+            }
+
         }
         else
         {
@@ -167,14 +197,46 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2, bool floor)
 
         }
 
-        glBegin(GL_POLYGON);
-        glVertex3f(p1[0], p1[1], p1[2]);
-        glVertex3f(p2[0], p1[1], p2[2]);
-        glVertex3f(p2[0], p2[1], p2[2]);
-        glVertex3f(p1[0], p2[1], p2[2]);
-        glEnd();
+
+        if(floor && texture_img.size().x > 0)
+        {
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, textureName);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glBegin (GL_QUADS);
+            glTexCoord2f (0.0, 0.0);
+            glVertex3f(p1[0], p1[1], p1[2]);
+            glTexCoord2f (1.0, 0.0);
+            glVertex3f(p2[0], p1[1], p2[2]);
+            glTexCoord2f (1.0, 1.0);
+            glVertex3f(p2[0], p2[1], p2[2]);
+            glTexCoord2f (0.0, 1.0);
+            glVertex3f(p1[0], p2[1], p2[2]);
+            glEnd ();
+
+//            glTexCoord2f(0,0);
+//            glVertex3f(p1[0], p1[1], p1[2]);
+//            glTexCoord2f(0,1);
+//            glVertex3f(p2[0], p1[1], p2[2]);
+//            glTexCoord2f(1,1);
+//            glVertex3f(p2[0], p2[1], p2[2]);
+//            glTexCoord2f(1,0);
+//            glVertex3f(p1[0], p2[1], p2[2]);
+        }
+        else
+        {
+            glBegin(GL_POLYGON);
+            glVertex3f(p1[0], p1[1], p1[2]);
+            glVertex3f(p2[0], p1[1], p2[2]);
+            glVertex3f(p2[0], p2[1], p2[2]);
+            glVertex3f(p1[0], p2[1], p2[2]);
+            glEnd();
+        }
+
     }
 
+    return ;
     //LEFT
     for(int i=0; i<2; i++)
     {
@@ -318,6 +380,27 @@ void World::glDraw()
     if(!bDraw)
         return;
 
+    if(textureName == 0 && texture_img.size().x > 0)
+    {
+        //CVD::Image<CVD::Rgb<CVD::byte> > imgtex;
+        //CVD::img_load(imgtex,"texture.jpg");
+
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &World::textureName);
+        glBindTexture(GL_TEXTURE_2D, World::textureName);
+        glTexImage2D(GL_TEXTURE_2D,
+            0, GL_RGB,
+            texture_img.size().x, texture_img.size().y,
+            0, GL_RGB,
+            GL_UNSIGNED_BYTE,
+            texture_img.data());
+        glTexParameteri(GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR);
+       // glDisable(GL_TEXTURE_2D);
+
+         printf("hi %u %d %d\n", World::textureName, texture_img.size().x, texture_img.size().y);
+
+    }
 //    glLineWidth(2);
 //    glColor3f(0,0,1);
 
@@ -338,6 +421,21 @@ void World::glDraw()
 
 //    }
 //    glEnd();
+
+//    glColor3f(1.0f, 1.0f, 1.0f);
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, textureName);
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//    glBegin (GL_QUADS);
+//    glTexCoord2f (0.0, 0.0);
+//    glVertex3f (0.0, 0.0, 10);
+//    glTexCoord2f (1.0, 0.0);
+//    glVertex3f (10.0, 0.0, 10.0);
+//    glTexCoord2f (1.0, 1.0);
+//    glVertex3f (10.0, 10.0, 10.0);
+//    glTexCoord2f (0.0, 1.0);
+//    glVertex3f (0.0, 10.0, 10.0);
+//    glEnd ();
 
     for(int i=0 ; i<planes.size(); i++)
     {
@@ -425,10 +523,12 @@ double World::GetInterestingness(TooN::Vector<2, double> tl, TooN::Vector<2, dou
 
 double World::GetMaxHeightInRect(double x, double y, double footprint_l)
 {
+   // printf("here %f %f %f \n", x,y,footprint_l);
     double mxheight=0;
-    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=0.2 /*BS_MAX_LENGHT*/)
-        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=0.2 /*OBS_MAX_LENGHT*/)
+    for(double i=x-footprint_l/2;i<x+footprint_l/2; i+=0.8 /*BS_MAX_LENGHT*/)
+        for(double j=y-footprint_l/2;j<y+footprint_l/2; j+=0.8 /*OBS_MAX_LENGHT*/)
         {
+            //printf("here %f %f %f \n", i,j,footprint_l);
             double h = GetHeight(i,j);
             mxheight = (mxheight < h)?h:mxheight;
         }

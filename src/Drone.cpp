@@ -133,7 +133,7 @@ void Drone::glDraw()
 //        }
 //    }
 
-    DrawCell(pathWPs.front());
+    //DrawCell(pathWPs.front());
 //    if(!pathWPs.empty())
 //    {
 //        Vector<3> wpp = pathWPs.front()->p;
@@ -304,7 +304,7 @@ void Drone::GeneratePlan()
     DestroyPlan();
     GenerateCoveragePlan(World::Instance()->GetWidth(),
                  World::Instance()->GetLength(), sensor.GetSensorPose()[2]);
-    //printf("plan generated./n");
+    //printf("plan generated.\n");
 
 }
 
@@ -394,9 +394,9 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
 
     pathWPs.clear();
     nextPath.clear();
-    //printf("start point: %f %f %f", pose[0], pose[1], pose[2]);
+   // printf("start point: %f %f %f", pose[0], pose[1], pose[2]);
 
- //   printf("here3\n");
+   // printf("here3\n");
 
     tree.CreateTree();
     tree.root->p = makeVector(0,0,sensor.GetHeightWithGootprint(w_w));
@@ -414,17 +414,22 @@ void Drone::GenerateCoveragePlan(double w_w, double w_l, double flying_height)
 
         for(int j=(alternateFlag)?0:(ceil(w_l/footPrint_l)-1); (alternateFlag)?(j<ceil(w_l/footPrint_l)):(j>=0);(alternateFlag)?(j++):(j--))
         {
+
             double y = startPoint[1] + footPrint_l/2 + ((double)j)*footPrint_l;
 
             double scanHeight = flying_height;
 
             PlanNode *pn = CreatePlanNode();
             pn->p = makeVector(x,y, scanHeight);
+
+           // printf("here1\n", i, j);
+
             SetExpandable(pn);
+
+            //printf("here2\n", i, j);
 
             pathWPs.push_back(pn);
             tree.AddChild(tree.root, pn);
-
         }
 
     }
@@ -775,7 +780,10 @@ void Drone::MoveToGoal(double step_l)
 
 void Drone::SetExpandable(PlanNode *pn)
 {
+    //printf("here1\n");
     double dh = pn->p[2] - World::Instance()->GetMaxHeightInRect(pn->p[0], pn->p[1], sensor.GetFootprint(pn->p[2]));
+    //printf("here3\n");
+
     if(dh >  MAX_DIST_TO_OBSTACLES)
     {
        // printf("dh ====  %f\n", dh);
