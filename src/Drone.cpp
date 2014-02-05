@@ -56,7 +56,7 @@ void Drone::init(int branchingDeg, int startlvl, Traverse_Strategy st)
 
 void Drone::glDraw()
 {
-
+    glDisable(GL_TEXTURE_2D);
 //    for(int i=0; i<tspoint.size(); i++)
 //    {
 //       // DrawFrustum(pathWPs[i], pathWPs[i][2]);
@@ -73,8 +73,9 @@ void Drone::glDraw()
 //        glEnd();
 //    }
 
-//    tree.glDraw();
+   tree.glDraw();
 
+return;
     // draw path
     for(int i=0; i<pathWPs.size(); i++)
     {
@@ -92,7 +93,7 @@ void Drone::glDraw()
 
         if(i+1<pathWPs.size())
         {
-            glColor3f(0,0,0);
+            glColor3f(0.5,0.5,1);
             glLineWidth(3);
             glBegin(GL_LINES);
             glVertex3f(pathWPs[i]->p[0],pathWPs[i]->p[1],pathWPs[i]->p[2]);
@@ -600,7 +601,7 @@ void Drone::MoveToGoal(double step_l)
                         // reached a tentative node
                         if(goalNode->tentative == 1)
                         {
-                            if(SubTreeInterestingLeaves(goalNode) >= 1)
+                            if(tree.SubTreeInterestingLeaves(goalNode) >= 1)
                             {
                                 if(!goalNode->parent->visited)
                                 {
@@ -647,7 +648,7 @@ void Drone::MoveToGoal(double step_l)
                                        // printf("3\n");
                                         if(grandparent != NULL)
                                         {
-                                            if(!grandparent->visited && grandparent->tentative==1 && SubTreeInterestingLeaves(parent) >= 1)
+                                            if(!grandparent->visited && grandparent->tentative==1 && tree.SubTreeInterestingLeaves(parent) >= 1)
                                             {
                                                // printf("4\n");
 
@@ -663,7 +664,7 @@ void Drone::MoveToGoal(double step_l)
                                                // printf("5\n");
 
                                             }
-                                            else if(!grandparent->visited && grandparent->tentative==1 && SubTreeInterestingLeaves(parent) < 1)
+                                            else if(!grandparent->visited && grandparent->tentative==1 && tree.SubTreeInterestingLeaves(parent) < 1)
                                             {
                                                 //printf("6\n");
 
@@ -792,26 +793,6 @@ void Drone::SetExpandable(PlanNode *pn)
     else
         pn->expandable = false;
 
-}
-int Drone::SubTreeInterestingLeaves(PlanNode *root)
-{
-    if(root->children.empty())
-    {
-        if(root->interestingness > 0.2)
-            return 1;
-        else
-            return 0;
-    }
-    else
-    {
-        int n = 0;
-        for(int i=0; i<root->children.size(); i++)
-        {
-            n += SubTreeInterestingLeaves(root->children[i]);
-        }
-
-        return n;
-    }
 }
 
 PlanNode * Drone::FindClosestChild(PlanNode *parent, PlanNode *pn)

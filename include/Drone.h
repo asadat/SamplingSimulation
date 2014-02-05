@@ -25,6 +25,8 @@
 
 using namespace TooN;
 using namespace std;
+//class Drone;
+//int Drone::SubTreeInterestingLeaves(PlanNode* root);
 struct PlanNode
 {
     Vector<3> p;
@@ -58,18 +60,43 @@ struct Tree
         root->visited = true;
     }
 
+    int SubTreeInterestingLeaves(PlanNode *r)
+    {
+        if(r->children.empty())
+        {
+            if(r->interestingness > 0.2)
+                return 1;
+            else
+                return 0;
+        }
+        else
+        {
+            int n = 0;
+            for(int i=0; i<r->children.size(); i++)
+            {
+                n += SubTreeInterestingLeaves(r->children[i]);
+            }
+
+            return n;
+        }
+    }
+
     void glDraw()
     {
+        glDisable(GL_TEXTURE_2D);
         for(int i=0; i<levelNodes.size(); i++)
         {
             vector<PlanNode*> &nds = levelNodes[i];
-            glColor3f(0,0,0);
-            glLineWidth(1);
+            glColor3f(0,0,1-(1.0*i)/levelNodes.size());
+            glLineWidth(levelNodes.size()-0.5*i);
             glBegin(GL_LINES);
             for(int j=0; j<nds.size(); j++)
             {
-                glVertex3f(nds[j]->p[0],nds[j]->p[1],nds[j]->p[2]);
-                glVertex3f(nds[j]->parent->p[0],nds[j]->parent->p[1],nds[j]->parent->p[2]);
+                if(SubTreeInterestingLeaves(nds[j]) > 0)
+                {
+                    glVertex3f(nds[j]->p[0],nds[j]->p[1],nds[j]->p[2]);
+                    glVertex3f(nds[j]->parent->p[0],nds[j]->parent->p[1],nds[j]->parent->p[2]);
+                }
             }
             glEnd();
 
@@ -167,7 +194,6 @@ private:
     void PlanForLevel(int depth);
     double PathLength(vector< PlanNode* > & path);
     void AddChild(PlanNode* parent, PlanNode* child);
-    int SubTreeInterestingLeaves(PlanNode* root);
     void DrawCell(PlanNode *p);
     void SortNodes(vector<PlanNode*> &list, PlanNode* p);
     FeatureTracker sensor;
@@ -198,5 +224,6 @@ private:
     double surveyLength;
 
 };
+
 
 #endif

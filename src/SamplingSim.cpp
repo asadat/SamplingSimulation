@@ -479,7 +479,7 @@ void SamplingSim::mainLoop()
     glEnable(GL_DEPTH_TEST);
     glutIgnoreKeyRepeat(true);
 
-    translateCamera(0, 0, 100);
+    translateCamera(0, 0, 130);
     rotateCamera(0,-1.57,0);
 
     // run glut

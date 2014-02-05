@@ -72,6 +72,7 @@ void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
     glColor3f(0,0,0);
     glLineWidth(1);
     glBegin(GL_LINES);
+
     glVertex3f(camp[0], camp[1], camp[2]);
     glVertex3f(camp[0], camp[1], camp[2]-0.5);
 
@@ -88,11 +89,22 @@ void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
     glVertex3f(camp[0]-dxy, camp[1]-dxy, camp[2]-size);
     glEnd();
 
+    glLineWidth(2);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glBegin(GL_POLYGON);
+    glVertex3f(camp[0]+dxy, camp[1]-dxy, camp[2]-size);
+    glVertex3f(camp[0]+dxy, camp[1]+dxy, camp[2]-size);
+    glVertex3f(camp[0]-dxy, camp[1]+dxy, camp[2]-size);
+    glVertex3f(camp[0]-dxy, camp[1]-dxy, camp[2]-size);
+    glVertex3f(camp[0]+dxy, camp[1]-dxy, camp[2]-size);
+    glEnd();
+
 
 }
 
 void FeatureTracker::glDraw()
 {
+
 //    static int lastt = 0;
 //    static int idx=0;
 //    lastt++;
@@ -116,7 +128,7 @@ void FeatureTracker::glDraw()
 //        glEnd();
 //    }
 
-    DrawFrustum(pose, pose[2]);
+    DrawFrustum(pose, 5/*pose[2]*/);
 
     //std::vector<Feature> fs = MatchedFeatures(pose);
     std::vector<Feature> fs = features;

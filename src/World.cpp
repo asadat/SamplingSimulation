@@ -41,10 +41,10 @@ void World::PopulateWorldFromImage(char * imagepath)
             //printf("at: %d %d\n", i, j);
 
             CVD::Rgb<CVD::byte> c = img[j][i];
-            //if(c.red < 100 && c.blue < 100 && c.green > 100)
-            if(c.red > 250 && c.green > 250 && c.blue <5 ||
-                    c.red < 5 && c.green > 250 && c.blue <5 ||
-                    c.red > 250 && c.green > 250 && c.blue >250)//(c.red < 150 && c.blue < 100 && c.green > 100) || (c.red > 200 && c.blue < 150 && c.green > 200))
+            if(c.red > 100 && c.blue < 100 && c.green < 100)
+            //if(c.red > 250 && c.green > 250 && c.blue <5 ||
+            //        c.red < 5 && c.green > 250 && c.blue <5 ||
+            //        c.red > 250 && c.green > 250 && c.blue >250)//(c.red < 150 && c.blue < 100 && c.green > 100) || (c.red > 200 && c.blue < 150 && c.green > 200))
             {
                 n++;
                 double x1,x2,y1,y2;
