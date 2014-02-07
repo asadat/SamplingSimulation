@@ -347,12 +347,12 @@ void SamplingSim::hanldeKeyPressed(std::map<unsigned char, bool> &key, bool &upd
 
     if(key[']'])
     {
-        drone.ChangeSpeed(2);
+        drone.ChangeSpeed(0.1);
     }
 
     if(key['['])
     {
-        drone.ChangeSpeed(-2);
+        drone.ChangeSpeed(-0.1);
     }
 
     if(key['u'])
@@ -479,7 +479,7 @@ void SamplingSim::mainLoop()
     glEnable(GL_DEPTH_TEST);
     glutIgnoreKeyRepeat(true);
 
-    translateCamera(0, 0, 130);
+    translateCamera(0, 0, 30);
     rotateCamera(0,-1.57,0);
 
     // run glut

@@ -75,31 +75,55 @@ void Drone::glDraw()
 
    tree.glDraw();
 
-return;
+//return;
     // draw path
-    for(int i=0; i<pathWPs.size(); i++)
-    {
-       // DrawFrustum(pathWPs[i], pathWPs[i][2]);
-        if(pathWPs[i]->tentative == 1)
-            glColor3f(1,0,0);
-        else
-            glColor3f(1,1,1);
+//    for(int i=0; i<pathWPs.size(); i++)
+//    {
+//       // DrawFrustum(pathWPs[i], pathWPs[i][2]);
+//        if(pathWPs[i]->tentative == 1)
+//            glColor3f(1,0,0);
+//        else
+//            glColor3f(1,1,1);
 
-        glPointSize(10);
+//        glPointSize(9);
+//        glBegin(GL_POINTS);
+//        glVertex3f(pathWPs[i]->p[0], pathWPs[i]->p[1], pathWPs[i]->p[2]);
+//        glEnd();
+
+
+//        //glLineStipple(5, 0xAAAA);
+//        //glEnable(GL_LINE_STIPPLE);
+
+//        if(i+1<pathWPs.size())
+//        {
+//            glColor3f(0.1,0.1,0.5);
+//            glLineWidth(9);
+//            glBegin(GL_LINES);
+//            glVertex3f(pathWPs[i]->p[0],pathWPs[i]->p[1],pathWPs[i]->p[2]);
+//            glVertex3f(pathWPs[i+1]->p[0],pathWPs[i+1]->p[1],pathWPs[i+1]->p[2]);
+//            glEnd();
+//        }
+//        glDisable(GL_LINE_STIPPLE);
+//    }
+
+    for(int i=0; i<wps.size(); i++)
+    {
+        glColor3f(0.1,0.1,0.5);
+        glPointSize(14);
         glBegin(GL_POINTS);
-        glVertex3f(pathWPs[i]->p[0], pathWPs[i]->p[1], pathWPs[i]->p[2]);
+        glVertex3f(wps[i]->p[0], wps[i]->p[1], wps[i]->p[2]);
         glEnd();
 
-
-        if(i+1<pathWPs.size())
+        if(i+1<wps.size())
         {
-            glColor3f(0.5,0.5,1);
-            glLineWidth(3);
+            glColor3f(0.1,0.1,0.5);
+            glLineWidth(4);
             glBegin(GL_LINES);
-            glVertex3f(pathWPs[i]->p[0],pathWPs[i]->p[1],pathWPs[i]->p[2]);
-            glVertex3f(pathWPs[i+1]->p[0],pathWPs[i+1]->p[1],pathWPs[i+1]->p[2]);
+            glVertex3f(wps[i]->p[0],wps[i]->p[1],wps[i]->p[2]);
+            glVertex3f(wps[i+1]->p[0],wps[i+1]->p[1],wps[i+1]->p[2]);
             glEnd();
         }
+
     }
 
     //Draw Next WPs
@@ -320,6 +344,7 @@ void Drone::ExecutePlan()
 
 void Drone::DestroyPlan()
 {
+    wps.clear();
     executingPlan = false;
     sensor.ClearHistory();
 
@@ -520,6 +545,16 @@ void Drone::MoveToGoal(double step_l)
 
         bool reachedWP = false;
         PlanNode *goalNode = pathWPs.front();
+
+        if(wps.empty())
+        {
+            wps.push_back(goalNode);
+        }
+
+        if(wps.back()!= goalNode)
+        {
+            wps.push_back(goalNode);
+        }
 
         //fix the observation height; one time for each node
         if(!goalNode->observationHeightFixed)

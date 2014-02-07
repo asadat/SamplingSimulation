@@ -6,8 +6,8 @@
 #include <stdio.h>
 
 #define MAX(a,b)    (a>b?a:b)
-#define WORLD_WIDTH     128.0
-#define WORLD_LENGTH    128.0
+#define WORLD_WIDTH     16.0
+#define WORLD_LENGTH    16.0
 #define WORLD_MAX_HEIGHT    0.1
 #define OBS_MAX_LENGHT  30
 
@@ -41,10 +41,10 @@ void World::PopulateWorldFromImage(char * imagepath)
             //printf("at: %d %d\n", i, j);
 
             CVD::Rgb<CVD::byte> c = img[j][i];
-            if(c.red > 100 && c.blue < 100 && c.green < 100)
-            //if(c.red > 250 && c.green > 250 && c.blue <5 ||
-            //        c.red < 5 && c.green > 250 && c.blue <5 ||
-            //        c.red > 250 && c.green > 250 && c.blue >250)//(c.red < 150 && c.blue < 100 && c.green > 100) || (c.red > 200 && c.blue < 150 && c.green > 200))
+            //if(c.red > 100 && c.blue < 100 && c.green < 100)
+            if(c.red > 250 && c.green > 250 && c.blue <5 ||
+                    c.red < 5 && c.green > 250 && c.blue <5 ||
+                    c.red > 250 && c.green > 250 && c.blue >250)//(c.red < 150 && c.blue < 100 && c.green > 100) || (c.red > 200 && c.blue < 150 && c.green > 200))
             {
                 n++;
                 double x1,x2,y1,y2;
@@ -155,6 +155,9 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2, bool floor)
     //TOP
     for(int i=0; i<1; i++)
     {
+        if (floor && i>0)
+            continue;
+
         if(i==0)
         {
 //            bool floor = false;
@@ -192,7 +195,8 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2, bool floor)
         }
         else
         {
-            glColor3f(1,1,1);
+            glLineWidth(5);
+            glColor3f(0,0,0);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         }
@@ -226,11 +230,17 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2, bool floor)
         }
         else
         {
+            double linezoff = 0;
+            if(i>0)
+            {
+                linezoff = 0.1;
+            }
+
             glBegin(GL_POLYGON);
-            glVertex3f(p1[0], p1[1], p1[2]);
-            glVertex3f(p2[0], p1[1], p2[2]);
-            glVertex3f(p2[0], p2[1], p2[2]);
-            glVertex3f(p1[0], p2[1], p2[2]);
+            glVertex3f(p1[0], p1[1], p1[2]+linezoff);
+            glVertex3f(p2[0], p1[1], p2[2]+linezoff);
+            glVertex3f(p2[0], p2[1], p2[2]+linezoff);
+            glVertex3f(p1[0], p2[1], p2[2]+linezoff);
             glEnd();
         }
 

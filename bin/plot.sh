@@ -3,11 +3,12 @@ echo "set output 'graph.pdf'" >>gp
 echo "set multiplot layout 2,4" >> gp
 for((i=10; i<50; i=i+5))
 do
-echo "set key left">>gp 
-
+echo "set key right">>gp 
+echo "set key font \",9\"">>gp
 if [ $i -gt 10 ]; then
 echo "unset key">>gp
 fi
+
 
 #echo "set lmargin 5">>gp 
 echo "set yrange [1:8.1]">>gp
@@ -29,11 +30,11 @@ fi
 
 echo "set xlabel \"#Patches\" font \",8\"">>gp
 
-echo "set pointsize 1">>gp
-echo "plot 'statistics' using 3:(\$1==0&&\$2==$i?(\$4/1000):1/0):(\$5/1000) with yerrorbars ls 3 title 'Breadth-First', \\">>gp
-echo       "'statistics' using 3:(\$1==1&&\$2==$i?(\$4/1000):1/0):(\$5/1000) with yerrorbars ls 25 title 'Depth-First', \\">>gp
-echo       "'statistics' using 3:(\$1==2&&\$2==$i?(\$4/1000):1/0):(\$5/1000) with yerrorbars ls 7 title 'Shortcut heuristic', \\">>gp
-echo       "'statistics' using 3:(\$1==3&&\$2==$i?(\$4/1000):1/0):(\$5/1000) with yerrorbars ls 9 title 'Lawnmower'">>gp
+echo "set pointsize 1.5">>gp
+echo "plot 'statistics' using 3:(\$1==0&&\$2==$i?(\$4/1000):1/0):(\$5/1000) with yerrorbars ls 12 title 'Breadth-First', \\">>gp
+echo       "'statistics' using 3:(\$1==1&&\$2==$i?(\$4/1000):1/0):(\$5/1000) with yerrorbars ls 16 title 'Depth-First', \\">>gp
+echo       "'statistics' using 3:(\$1==2&&\$2==$i?(\$4/1000):1/0):(\$5/1000) with yerrorbars ls 34 title 'Shortcut heuristic', \\">>gp
+echo       "'statistics' using 3:(\$1==3&&\$2==$i?(\$4/1000):1/0):(\$5/1000) with yerrorbars ls 52 title 'Lawnmower'">>gp
 done
 echo "unset multiplot" >> gp
 #echo "replot">>gp

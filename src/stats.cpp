@@ -2,7 +2,7 @@
 #include <map>
 #include <vector>
 #include <math.h>
-
+#include <string>
 using namespace std;
 
 double mean(vector<double> &v)
@@ -86,6 +86,7 @@ int main(int argc, char **argv)
 
     for(int i=0; i<4; i++)
     {
+
         for(itt = data[i].begin(); itt!=data[i].end(); itt++)
         {
             for(it = itt->second.begin(); it!=itt->second.end(); it++)

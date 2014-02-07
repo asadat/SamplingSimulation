@@ -61,7 +61,7 @@ FeatureTracker::FeatureTracker(TooN::Vector<3,double> startPos):Visualizer()
 
 void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
 {
-    glColor3f(0,1,0);
+    glColor3f(0,0,0.5);
     glPointSize(10);
     glBegin(GL_POINTS);
     glVertex3f(camp[0], camp[1], camp[2]);
@@ -70,11 +70,11 @@ void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
     double dxy = size * tan(FOV/2);
 
     glColor3f(0,0,0);
-    glLineWidth(1);
+    glLineWidth(3);
     glBegin(GL_LINES);
 
-    glVertex3f(camp[0], camp[1], camp[2]);
-    glVertex3f(camp[0], camp[1], camp[2]-0.5);
+//    glVertex3f(camp[0], camp[1], camp[2]);
+//    glVertex3f(camp[0], camp[1], camp[2]-0.5);
 
     glVertex3f(camp[0], camp[1], camp[2]);
     glVertex3f(camp[0]+dxy, camp[1]+dxy, camp[2]-size);
@@ -89,7 +89,7 @@ void FeatureTracker::DrawFrustum(Vector<3, double> camp, double size)
     glVertex3f(camp[0]-dxy, camp[1]-dxy, camp[2]-size);
     glEnd();
 
-    glLineWidth(2);
+    glLineWidth(5);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glBegin(GL_POLYGON);
     glVertex3f(camp[0]+dxy, camp[1]-dxy, camp[2]-size);
@@ -128,7 +128,7 @@ void FeatureTracker::glDraw()
 //        glEnd();
 //    }
 
-    DrawFrustum(pose, 5/*pose[2]*/);
+    DrawFrustum(pose, /*5*/pose[2]-0.2);
 
     //std::vector<Feature> fs = MatchedFeatures(pose);
     std::vector<Feature> fs = features;

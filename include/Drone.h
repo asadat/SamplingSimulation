@@ -84,15 +84,19 @@ struct Tree
     void glDraw()
     {
         glDisable(GL_TEXTURE_2D);
+        glLineStipple(1, 0xAAAA);
+        glEnable(GL_LINE_STIPPLE);
+
         for(int i=0; i<levelNodes.size(); i++)
         {
             vector<PlanNode*> &nds = levelNodes[i];
             glColor3f(0,0,1-(1.0*i)/levelNodes.size());
-            glLineWidth(levelNodes.size()-0.5*i);
+            //glLineWidth(levelNodes.size()-0.5*i);
+            glLineWidth(2);
             glBegin(GL_LINES);
             for(int j=0; j<nds.size(); j++)
             {
-                if(SubTreeInterestingLeaves(nds[j]) > 0)
+//               / if(SubTreeInterestingLeaves(nds[j]) > 0)
                 {
                     glVertex3f(nds[j]->p[0],nds[j]->p[1],nds[j]->p[2]);
                     glVertex3f(nds[j]->parent->p[0],nds[j]->parent->p[1],nds[j]->parent->p[2]);
@@ -100,7 +104,24 @@ struct Tree
             }
             glEnd();
 
+            glColor3f(0,0,0);
+            glBegin(GL_POINTS);
+            glPointSize(10);
+            for(int j=0; j<nds.size(); j++)
+            {
+//               / if(SubTreeInterestingLeaves(nds[j]) > 0)
+                {
+                    glVertex3f(nds[j]->p[0],nds[j]->p[1],nds[j]->p[2]);
+
+                }
+            }
+            glEnd();
+
         }
+        glDisable(GL_LINE_STIPPLE);
+
+
+
     }
 
     void AddChild(PlanNode* parent, PlanNode* node)
@@ -157,7 +178,7 @@ struct Tree
 class Drone:public Visualizer
 {
 public:
-    enum Traverse_Strategy {BREADTH_FIRST=0, DEPTH_FIRST, SHORTCUT_1, LAWNMOWER, NONE};
+    enum Traverse_Strategy {DEPTH_FIRST=0, SHORTCUT_1, BREADTH_FIRST,LAWNMOWER, NONE};
     Drone();
     ~Drone();
 
@@ -215,6 +236,7 @@ private:
     //executed path
     vector< PlanNode* > pathWPs;
     vector< PlanNode* > nextPath;
+    vector< PlanNode* > wps;
 
     vector<Entity*> tspoint;
 
