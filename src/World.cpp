@@ -6,8 +6,8 @@
 #include <stdio.h>
 
 #define MAX(a,b)    (a>b?a:b)
-#define WORLD_WIDTH     16.0
-#define WORLD_LENGTH    16.0
+#define WORLD_WIDTH     64.0
+#define WORLD_LENGTH    64.0
 #define WORLD_MAX_HEIGHT    0.1
 #define OBS_MAX_LENGHT  30
 

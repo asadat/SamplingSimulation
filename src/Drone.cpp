@@ -108,8 +108,8 @@ void Drone::glDraw()
 
     for(int i=0; i<wps.size(); i++)
     {
-        glColor3f(0.1,0.1,0.5);
-        glPointSize(14);
+        glColor3f(1,0.5,0.5);
+        glPointSize(10);
         glBegin(GL_POINTS);
         glVertex3f(wps[i]->p[0], wps[i]->p[1], wps[i]->p[2]);
         glEnd();
@@ -117,7 +117,7 @@ void Drone::glDraw()
         if(i+1<wps.size())
         {
             glColor3f(0.1,0.1,0.5);
-            glLineWidth(4);
+            glLineWidth(3);
             glBegin(GL_LINES);
             glVertex3f(wps[i]->p[0],wps[i]->p[1],wps[i]->p[2]);
             glVertex3f(wps[i+1]->p[0],wps[i+1]->p[1],wps[i+1]->p[2]);
