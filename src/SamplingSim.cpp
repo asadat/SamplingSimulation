@@ -103,6 +103,8 @@ void update_event(int ms)
 
 
 
+
+
     if(Mouse_Right)
     {
         // yaw and pitch camera
@@ -343,6 +345,11 @@ void SamplingSim::hanldeKeyPressed(std::map<unsigned char, bool> &key, bool &upd
     if(key['`'])
     {
         world->PopulateWorld(20);
+    }
+
+    if(key['7'])
+    {
+        drone.ChangeSpeed(10);
     }
 
     if(key[']'])

@@ -177,7 +177,7 @@ void World::DrawBox(Vector<3, double> p1, Vector<3, double> p2, bool floor)
             else
             {
                 if(floor)
-                    glColor3f(233.0/255, 227.0/255, 133.0/255);
+                    glColor3f(255.0/255, 248.0/255, 222.0/255);
                 else
                    // glColor3f(205.0/255, 92.0/255, 92.0/255);
                      glColor3f(95.0/255, 252.0/255, 92.0/255);

@@ -81,7 +81,7 @@ struct Tree
         }
     }
 
-    void glDraw()
+    void glDraw(bool draw_tree=true)
     {
         glDisable(GL_TEXTURE_2D);
         glLineStipple(1, 0xAAAA);
@@ -92,21 +92,26 @@ struct Tree
             vector<PlanNode*> &nds = levelNodes[i];
             glColor3f(0,0,1-(1.0*i)/levelNodes.size());
             //glLineWidth(levelNodes.size()-0.5*i);
-            glLineWidth(2);
-            glBegin(GL_LINES);
-            for(int j=0; j<nds.size(); j++)
+            if(draw_tree)
             {
-//               / if(SubTreeInterestingLeaves(nds[j]) > 0)
+                glLineWidth(1);
+                glBegin(GL_LINES);
+                for(int j=0; j<nds.size(); j++)
                 {
-                    glVertex3f(nds[j]->p[0],nds[j]->p[1],nds[j]->p[2]);
-                    glVertex3f(nds[j]->parent->p[0],nds[j]->parent->p[1],nds[j]->parent->p[2]);
+                    //if(SubTreeInterestingLeaves(nds[j]) > 0)
+                    {
+                        glVertex3f(nds[j]->p[0],nds[j]->p[1],nds[j]->p[2]);
+                        glVertex3f(nds[j]->parent->p[0],nds[j]->parent->p[1],nds[j]->parent->p[2]);
+                    }
                 }
+
+                glEnd();
             }
-            glEnd();
+
+            glPointSize(1);
 
             glColor3f(0,0,0);
             glBegin(GL_POINTS);
-            glPointSize(10);
             for(int j=0; j<nds.size(); j++)
             {
 //               / if(SubTreeInterestingLeaves(nds[j]) > 0)
@@ -119,9 +124,6 @@ struct Tree
 
         }
         glDisable(GL_LINE_STIPPLE);
-
-
-
     }
 
     void AddChild(PlanNode* parent, PlanNode* node)

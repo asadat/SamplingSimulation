@@ -99,7 +99,7 @@ void TSP::GetShortestPath(vector<Entity* > &to_visit, vector<Entity* >& tsplist)
     //return to_visit;
    // std::vector< Entity* > ent_in_order;
     vector<Vertex> shortest_path_vect;
-    VertexListGraph g( to_visit.size());
+    VertexListGraph g(to_visit.size());
     WeightMap weight_map(get(edge_weight, g));
 
     //populate map from vertices to Triangle3D structs
@@ -121,7 +121,7 @@ void TSP::GetShortestPath(vector<Entity* > &to_visit, vector<Entity* >& tsplist)
         tsplist.push_back( verts_to_ent[*itr] );
     }
 
-    TwoOptOptimization(tsplist);
+   // TwoOptOptimization(tsplist);
     //TwoOptOptimization(ent_in_order);
     //TwoOptOptimization(ent_in_order);
     //TwoOptOptimization(ent_in_order);
@@ -192,7 +192,7 @@ void TSP::create_connected_graph(VertexListGraph &g, WeightMap wmap, std::map<Ve
             if (dest != src)
             {
                 //printf("O3 ");
-                double weight = 0;
+                double weight = 0.1;
 
 
                 //the weights to and from the dummy vertex (indexes NULL) will be left as zero
@@ -200,7 +200,7 @@ void TSP::create_connected_graph(VertexListGraph &g, WeightMap wmap, std::map<Ve
                     Vector<3> src_center = ( vmap[*src]->pos );
                     Vector<3> dest_center =( vmap[*dest]->pos );
 
-                    weight = sqrt((src_center-dest_center)*(src_center-dest_center));
+                    weight = 0.1+sqrt((src_center-dest_center)*(src_center-dest_center));
                     //printf("%f \n",weight);
                 }
                 else
@@ -209,7 +209,7 @@ void TSP::create_connected_graph(VertexListGraph &g, WeightMap wmap, std::map<Ve
                     {
                         if(!vmap[*src]->start && !vmap[*src]->end )
                         {
-                            weight = 999999999999999;
+                            weight = 99999999;
                         }
                     }
 
@@ -217,14 +217,16 @@ void TSP::create_connected_graph(VertexListGraph &g, WeightMap wmap, std::map<Ve
                     {
                         if(!vmap[*dest]->start && !vmap[*dest]->end)
                         {
-                            weight = 9999999999999999;
+                            weight = 999999999;
                         }
                     }
                 }
 
                 boost::tie(e, inserted) = add_edge(*src, *dest, g);
                 wmap[e] = weight;
+
                 //printf("%f \t",weight);
+
                 //boost::tie(e, inserted) = add_edge(*dest, *src, g);
                 //wmap[e] = weight;
 
@@ -236,6 +238,6 @@ void TSP::create_connected_graph(VertexListGraph &g, WeightMap wmap, std::map<Ve
 
         }
     }
-   // printf("\n");
+    //printf("\n");
     //ROS_INFO("Found %lu vertices and %lu edges\n", num_vertices(g), num_edges(g));
 }

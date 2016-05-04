@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.4.6 FATAL_ERROR)
 
 SET(ProjName SamplingSimulation)
-
+set(CMAKE_CXX_FLAGS "-std=c++11 -fpermissive ${CMAKE_CXX_FLAGS}")
 #uncomment for mac
 #include_directories("include")
 #include_directories("/usr/local/include/TooN")
@@ -16,7 +16,7 @@ SET(ProjName SamplingSimulation)
 #link_directories("/usr/local/lib")
 
 #uncomment for ubuntu
-include_directories("~/libcvd")
+include_directories("~/libcvd/include")
 
 include_directories("./include")
 include_directories("./include/tree")
@@ -24,7 +24,7 @@ include_directories("./TooN/include")
 include_directories("/usr/include")
 link_directories("/usr/lib/x86_64-linux-gnu")
 link_directories("/usr/lib")
-link_directories("~/libcvd")
+link_directories("~/libcvd/lib")
 
 set(Samp_LIBRARIES GL GLU glut gmp CGAL CGAL_Core cvd)
 

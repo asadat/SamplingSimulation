@@ -56,6 +56,26 @@ void Drone::init(int branchingDeg, int startlvl, Traverse_Strategy st)
 
 void Drone::glDraw()
 {
+    static vector<Vector<3>> colors;
+    if(colors.empty())
+    {
+        colors.push_back(makeVector(1,0,0));
+        colors.push_back(makeVector(0,1,0));
+        colors.push_back(makeVector(1,1,0));
+        colors.push_back(makeVector(1,0,1));
+        colors.push_back(makeVector(0,0,1));
+        colors.push_back(makeVector(0,1,1));
+        colors.push_back(makeVector(1,0.5,0));
+        colors.push_back(makeVector(1,0,0.5));
+        colors.push_back(makeVector(0.5,0,0));
+        colors.push_back(makeVector(0.5,1,0));
+        colors.push_back(makeVector(0,0,1));
+        colors.push_back(makeVector(0.5,1,0));
+        colors.push_back(makeVector(1,0.5,1));
+        colors.push_back(makeVector(0,1,0.5));
+        colors.push_back(makeVector(1,0.5,0));
+        colors.push_back(makeVector(1,0,0.5));
+    }
     glDisable(GL_TEXTURE_2D);
 //    for(int i=0; i<tspoint.size(); i++)
 //    {
@@ -73,7 +93,7 @@ void Drone::glDraw()
 //        glEnd();
 //    }
 
-   tree.glDraw();
+   tree.glDraw(strategy != LAWNMOWER);
 
 //return;
     // draw path
@@ -116,10 +136,15 @@ void Drone::glDraw()
 
         if(i+1<wps.size())
         {
-            glColor3f(0.1,0.1,0.5);
+            Vector<3> c1 = colors[((int)wps[i]->p[2])%colors.size()];
+            Vector<3> c2 = colors[((int)wps[i+1]->p[2])%colors.size()];
+
+            //glColor3f(0.1,0.1,0.5);
             glLineWidth(3);
             glBegin(GL_LINES);
+            glColor3f(c1[0],c1[1],c1[2]);
             glVertex3f(wps[i]->p[0],wps[i]->p[1],wps[i]->p[2]);
+            glColor3f(c2[0],c2[1],c2[2]);
             glVertex3f(wps[i+1]->p[0],wps[i+1]->p[1],wps[i+1]->p[2]);
             glEnd();
         }
